@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Новости - Чистый Мир{% endblock title %}
+{% block content %}
+
+<div class="container py-5">
+  <h2 class="mb-4 text-primary fw-bold border-bottom border-primary pb-2">Новости</h2>
+  {% if news %}
+  <div class="row g-4">
+    {% for n in news %}
+    <div class="col-lg-4 col-md-6">
+      <div class="card shadow rounded-4 overflow-hidden h-100">
+        {% if n.image %}
+        <img src="{{ n.image.url }}" class="card-img-top" style="height: 220px; object-fit: cover;">
+        {% endif %}
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-primary fw-bold">{{ n.title }}</h5>
+          <p class="card-text text-muted">{{ n.content|truncatewords:25 }}</p>
+          <small class="text-secondary mt-auto">{{ n.created_at|date:"d M Y" }}</small>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">Новости отсутствуют</p>
+  {% endif %}
+</div>
+{% endblock content %}

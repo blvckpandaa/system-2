@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Мои чаты{% endblock title %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="section-title mb-0">Мои чаты</h2>
+    <a href="{% url 'index' %}" class="btn btn-outline-primary">
+      <i class="fas fa-arrow-left me-2"></i>На главную
+    </a>
+  </div>
+
+  {% if chats %}
+    <div class="row g-4">
+      {% for chat in chats %}
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100 shadow-sm border-0 rounded-3 overflow-hidden">
+            {% if chat.announcement and chat.announcement.images.all %}
+              <div class="position-relative" style="height: 180px;">
+                <img src="{{ chat.announcement.images.first.image.url }}" class="card-img-top w-100 h-100 object-fit-cover" alt="{{ chat.announcement.title }}">
+              </div>
+            {% elif chat.announcement %}
+              <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
+                <i class="fas fa-image fa-2x"></i>
+              </div>
+            {% else %}
+              <div class="bg-info bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 180px;">
+                <i class="fas fa-comments fa-3x text-info"></i>
+              </div>
+            {% endif %}
+            
+            <div class="card-body d-flex flex-column">
+              {% if chat.announcement %}
+                <h5 class="card-title">{{ chat.announcement.title }}</h5>
+                <p class="text-muted">
+                  <small>
+                    Категория: {{ chat.announcement.category.name }}<br>
+                    {% if chat.announcement.user != user %}
+                    Продавец: {{ chat.announcement.user.get_full_name|default:chat.announcement.user.username }}
+                    {% else %}
+                    Вы продаете этот товар
+                    {% endif %}
+                  </small>
+                </p>
+              {% else %}
+                <h5 class="card-title">Общий чат</h5>
+                <p class="text-muted small">
+                  Участники: 
+                  {% for participant in chat.participants.all %}
+                    {% if participant != user %}
+                      {{ participant.get_full_name|default:participant.username }}{% if not forloop.last %}, {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                </p>
+              {% endif %}
+
+              <div class="mt-auto">
+                {% with last_message=chat.messages.last %}
+                  {% if last_message %}
+                    <div class="text-muted small mb-2 border-top pt-2">
+                      <div class="d-flex justify-content-between">
+                        <div>Последнее: {{ last_message.text|truncatechars:25 }}</div>
+                        <div>{{ last_message.created_at|date:"d.m.Y" }}</div>
+                      </div>
+                    </div>
+                  {% endif %}
+                {% endwith %}
+                
+                <a href="{% url 'chat_detail' chat.id %}" class="btn btn-primary w-100 mt-2">
+                  <i class="fas fa-comments me-2"></i>Перейти в чат
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>  
+  {% else %}
+    <div class="text-center py-5 bg-light rounded-3">
+      <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+      <h4>У вас пока нет активных чатов</h4>
+      <p class="text-muted">Начните диалог с продавцом через страницу объявления</p>
+      <a href="{% url 'announcement_list' %}" class="btn btn-primary mt-2">
+        <i class="fas fa-search me-2"></i>Найти объявления
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock content %}

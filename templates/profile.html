@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Мой профиль - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="text-center mb-4" style="color: #1F56A1; font-weight: bold;">Профиль пользователя</h2>
+
+  <!-- Profile Card -->
+  <div class="card shadow-lg rounded-4 overflow-hidden">
+    <div class="row g-0">
+      <div class="col-md-4 bg-light d-flex align-items-center justify-content-center py-4">
+        {% if profile.avatar %}
+          <img src="{{ profile.avatar.url }}" class="img-fluid rounded-circle" style="width: 220px; height: 220px; object-fit: cover;">
+        {% else %}
+          <img src="{% static 'default_avatar.png' %}" class="img-fluid rounded-circle" style="width: 220px; height: 220px; object-fit: cover;">
+        {% endif %}
+      </div>
+      <div class="col-md-8">
+        <div class="card-body py-4">
+          <p class="fs-5"><strong style="color: #1F56A1;">О себе:</strong> {{ profile.bio|default:"Информация не указана" }}</p>
+          <p class="fs-5"><strong style="color: #1F56A1;">Telegram:</strong> 
+            {% if profile.telegram_link %}
+              <a href="{{ profile.telegram_link }}" class="text-decoration-none" target="_blank">{{ profile.telegram_link }}</a>
+            {% else %}
+              Не указано
+            {% endif %}
+          </p>
+          <p class="fs-5"><strong style="color: #1F56A1;">Instagram:</strong> 
+            {% if profile.instagram_link %}
+              <a href="{{ profile.instagram_link }}" class="text-decoration-none" target="_blank">{{ profile.instagram_link }}</a>
+            {% else %}
+              Не указано
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Profile Form -->
+  <div class="card shadow-lg rounded-4 mt-5 p-4">
+    <h3 class="text-center mb-4" style="color: #1F56A1; font-weight: bold;">Обновить профиль</h3>
+    <form method="POST" action="{% url 'profile_update' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="id_bio" class="form-label">О себе</label>
+        <textarea class="form-control" id="id_bio" name="bio" rows="3">{{ profile.bio }}</textarea>
+      </div>
+      <div class="mb-3">
+        <label for="id_telegram" class="form-label">Telegram ссылка</label>
+        <input type="url" class="form-control" id="id_telegram" name="telegram_link" value="{{ profile.telegram_link }}">
+      </div>
+      <div class="mb-3">
+        <label for="id_instagram" class="form-label">Instagram ссылка</label>
+        <input type="url" class="form-control" id="id_instagram" name="instagram_link" value="{{ profile.instagram_link }}">
+      </div>
+      <div class="mb-3">
+        <label for="id_avatar" class="form-label">Аватар (новое изображение)</label>
+        <input type="file" class="form-control" id="id_avatar" name="avatar">
+      </div>
+      <button type="submit" class="btn btn-primary w-100 py-2">Сохранить изменения</button>
+    </form>
+  </div>
+</div>
+{% endblock content %}

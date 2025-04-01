@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Сделать пожертвование | {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow border-0">
+        <div class="card-body p-5">
+          <div class="text-center mb-4">
+            <i class="fas fa-heart text-danger fa-3x mb-3"></i>
+            <h1 class="text-primary mb-3">Сделайте пожертвование</h1>
+            <p class="lead text-muted mb-4">Ваша поддержка поможет нам развивать экологические проекты и сделать наш мир лучше.</p>
+          </div>
+          
+          {% if messages %}
+            <div class="mb-4">
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+          
+          <div class="card bg-light mb-4">
+            <div class="card-body p-4">
+              <h3 class="mb-3">Что мы делаем с вашими пожертвованиями:</h3>
+              <ul class="list-group list-group-flush bg-light">
+                <li class="list-group-item bg-light d-flex align-items-center">
+                  <i class="fas fa-seedling text-success fa-lg me-3"></i>
+                  <div>
+                    <h5 class="mb-1">Сажаем деревья</h5>
+                    <p class="mb-0 text-muted">Участвуем в восстановлении лесов и городском озеленении</p>
+                  </div>
+                </li>
+                <li class="list-group-item bg-light d-flex align-items-center">
+                  <i class="fas fa-hand-holding-water text-primary fa-lg me-3"></i>
+                  <div>
+                    <h5 class="mb-1">Очищаем водоемы</h5>
+                    <p class="mb-0 text-muted">Организуем акции по очистке рек и озер</p>
+                  </div>
+                </li>
+                <li class="list-group-item bg-light d-flex align-items-center">
+                  <i class="fas fa-book-open text-warning fa-lg me-3"></i>
+                  <div>
+                    <h5 class="mb-1">Проводим образовательные мероприятия</h5>
+                    <p class="mb-0 text-muted">Учим людей экологичному образу жизни</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          {% if user.is_authenticated %}
+            <form action="{% url 'process_donation' %}" method="POST" class="donation-form">
+              {% csrf_token %}
+              
+              <div class="form-group mb-4">
+                <label for="amount" class="form-label fs-5 mb-3">Выберите сумму пожертвования</label>
+                <div class="d-flex justify-content-between mb-3 donation-options">
+                  <button type="button" class="btn btn-outline-primary donation-btn" data-amount="100">100 ₽</button>
+                  <button type="button" class="btn btn-outline-primary donation-btn" data-amount="500">500 ₽</button>
+                  <button type="button" class="btn btn-outline-primary donation-btn" data-amount="1000">1000 ₽</button>
+                  <button type="button" class="btn btn-outline-primary donation-btn" data-amount="5000">5000 ₽</button>
+                </div>
+                <div class="input-group">
+                  <input type="number" name="amount" id="amount" min="10" step="1" class="form-control form-control-lg" placeholder="Другая сумма" required>
+                  <span class="input-group-text">₽</span>
+                </div>
+              </div>
+              
+              <div class="form-group text-center mt-4">
+                <button type="submit" class="btn btn-success btn-lg px-5 py-3">
+                  <i class="fas fa-heart me-2"></i>Сделать пожертвование
+                </button>
+              </div>
+            </form>
+          {% else %}
+            <div class="alert alert-warning p-4 text-center">
+              <h4 class="mb-3"><i class="fas fa-exclamation-circle me-2"></i>Требуется авторизация</h4>
+              <p class="mb-3">Чтобы сделать пожертвование, необходимо войти в свой аккаунт или зарегистрироваться.</p>
+              <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary">
+                  <i class="fas fa-sign-in-alt me-2"></i>Войти
+                </a>
+                <a href="{% url 'register' %}" class="btn btn-outline-primary">
+                  <i class="fas fa-user-plus me-2"></i>Регистрация
+                </a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const donationBtns = document.querySelectorAll('.donation-btn');
+    const amountInput = document.getElementById('amount');
+    
+    donationBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const amount = this.getAttribute('data-amount');
+        amountInput.value = amount;
+        
+        // Убираем активный класс у всех кнопок
+        donationBtns.forEach(b => b.classList.remove('active', 'btn-primary', 'text-white'));
+        b.classList.add('btn-outline-primary');
+        
+        // Добавляем активный класс текущей кнопке
+        this.classList.remove('btn-outline-primary');
+        this.classList.add('active', 'btn-primary', 'text-white');
+      });
+    });
+  });
+</script>
+{% endblock %} 

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Другие объявления - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="section-title mb-0">Другие рекламы</h2>
+    <a href="{% url 'index' %}" class="btn btn-outline-primary">
+      <i class="fas fa-arrow-left me-2"></i>На главную
+    </a>
+  </div>
+
+  {% if other_list %}
+    <div class="row g-4">
+      {% for o in other_list %}
+      <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+          {% if o.image %}
+            <div class="position-relative">
+              <img src="{{ o.image.url }}" class="card-img-top" style="height: 220px; object-fit: cover;" alt="{{ o.title }}">
+              {% if o.price %}
+              <span class="position-absolute top-0 end-0 badge bg-accent m-3 py-2 px-3 rounded-pill">
+                {{ o.price }} руб
+              </span>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+              <i class="fas fa-ad fa-3x text-muted"></i>
+            </div>
+          {% endif %}
+
+          <div class="card-body">
+            <h4 class="card-title mb-3">{{ o.title }}</h4>
+            <p class="card-text text-muted mb-4">{{ o.description|linebreaks|truncatewords:25 }}</p>
+            
+            <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-auto">
+              <div>
+                <p class="mb-1"><i class="fas fa-phone me-2 text-primary"></i>{{ o.phone }}</p>
+                <small class="text-muted"><i class="fas fa-calendar-alt me-2"></i>{{ o.created_at|date:"d.m.Y" }}</small>
+              </div>
+              <a href="tel:{{ o.phone }}" class="btn btn-primary rounded-pill">
+                <i class="fas fa-phone-alt me-2"></i>Позвонить
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 bg-light rounded-3">
+      <i class="fas fa-ad fa-3x text-muted mb-3"></i>
+      <h4>Пока нет рекламных объявлений</h4>
+      <p class="text-muted">Скоро здесь появятся интересные предложения</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock content %}

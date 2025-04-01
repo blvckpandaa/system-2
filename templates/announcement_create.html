@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Создать объявление - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <h1 class="mb-4">Создать объявление</h1>
+      
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-4">
+          <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="alert alert-danger">
+              {% for field, error_list in form.errors.items %}
+                <p><strong>{{ field }}:</strong> {{ error_list|join:", " }}</p>
+              {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="mb-4">
+              <label for="id_title" class="form-label fw-bold">
+                <i class="fas fa-heading me-2"></i>Заголовок
+              </label>
+              <input type="text" name="title" id="id_title" 
+                     class="form-control form-control-lg" 
+                     placeholder="Например: Переработка пластиковых бутылок" required>
+              <div class="invalid-feedback">
+                Пожалуйста, введите заголовок объявления.
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="id_category" class="form-label fw-bold">
+                <i class="fas fa-tag me-2"></i>Категория
+              </label>
+              <select name="category" id="id_category" 
+                     class="form-select form-select-lg" required>
+                <option value="">Выберите категорию</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+              </select>
+              <div class="invalid-feedback">
+                Пожалуйста, выберите категорию.
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="id_description" class="form-label fw-bold">
+                <i class="fas fa-align-left me-2"></i>Описание
+              </label>
+              <textarea name="description" id="id_description" 
+                        class="form-control" 
+                        placeholder="Подробное описание вашего объявления" 
+                        style="min-height: 150px;" required></textarea>
+              <div class="invalid-feedback">
+                Пожалуйста, введите описание.
+              </div>
+              <div class="form-text">Опишите детально ваше предложение. Чем больше информации, тем больше шансов найти отклик.</div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="id_price" class="form-label fw-bold">
+                <i class="fas fa-money-bill-wave me-2"></i>Цена (руб)
+              </label>
+              <input type="number" name="price" id="id_price" 
+                     class="form-control form-control-lg" 
+                     placeholder="Цена в рублях" required>
+              <div class="invalid-feedback">
+                Пожалуйста, укажите цену.
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="id_plan" class="form-label fw-bold">
+                <i class="fas fa-award me-2"></i>Тарифный план
+              </label>
+              <select name="plan" id="id_plan" class="form-select">
+                <option value="">Выберите тарифный план (необязательно)</option>
+                {% for plan in plans %}
+                <option value="{{ plan.id }}">{{ plan.name }} - {{ plan.amount }} руб.</option>
+                {% endfor %}
+              </select>
+              <div class="form-text">
+                Тарифные планы позволяют повысить видимость вашего объявления. 
+                <a href="{% url 'plan_list' %}" target="_blank">Узнать подробнее о тарифах</a>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="id_location" class="form-label fw-bold">
+                <i class="fas fa-map-marker-alt me-2"></i>Местоположение
+              </label>
+              <input type="text" name="location" id="id_location" 
+                     class="form-control" 
+                     placeholder="Например: Москва, ул. Ленина">
+            </div>
+            
+            <div class="mb-4">
+              <label for="id_phone" class="form-label fw-bold">
+                <i class="fas fa-phone me-2"></i>Телефон для связи
+              </label>
+              <input type="tel" name="phone" id="id_phone" 
+                     class="form-control" 
+                     placeholder="+7 (XXX) XXX-XX-XX" required>
+              <div class="invalid-feedback">
+                Пожалуйста, укажите контактный телефон.
+              </div>
+            </div>
+            
+            <!-- Скрытые поля -->
+            <input type="hidden" name="status" value="draft">
+            
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                <i class="fas fa-images me-2"></i>Изображения
+              </label>
+              <div class="custom-file-upload">
+                <input type="file" name="files" multiple accept="image/*" id="id_images" 
+                       class="d-none" onchange="showPreview(this)">
+                <label for="id_images" class="upload-area d-flex flex-column align-items-center justify-content-center rounded-3 border border-dashed p-4 text-center">
+                  <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-primary"></i>
+                  <p class="mb-1">Перетащите изображения сюда или кликните для выбора</p>
+                  <p class="small text-muted">Максимум 10 изображений. Рекомендуемый размер: 1200x800px.</p>
+                </label>
+              </div>
+              <div id="image-preview" class="d-flex flex-wrap mt-3 gap-2"></div>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-paper-plane me-2"></i>Опубликовать объявление
+              </button>
+              <a href="{% url 'announcement_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Вернуться к списку объявлений
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showPreview(input) {
+    const previewContainer = document.getElementById('image-preview');
+    previewContainer.innerHTML = '';
+    
+    if (input.files && input.files.length > 0) {
+      for (let i = 0; i < Math.min(input.files.length, 10); i++) {
+        const file = input.files[i];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          const previewCard = document.createElement('div');
+          previewCard.className = 'image-preview-item position-relative';
+          previewCard.style.width = '100px';
+          previewCard.style.height = '100px';
+          
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'w-100 h-100 rounded-3 object-fit-cover';
+          
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle p-0';
+          removeBtn.style.width = '24px';
+          removeBtn.style.height = '24px';
+          removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+          removeBtn.onclick = function(ev) {
+            ev.preventDefault();
+            previewCard.remove();
+          };
+          
+          previewCard.appendChild(img);
+          previewCard.appendChild(removeBtn);
+          previewContainer.appendChild(previewCard);
+        };
+        
+        reader.readAsDataURL(file);
+      }
+    }
+  }
+  
+  // Форма проверки
+  (function() {
+    'use strict';
+    var forms = document.querySelectorAll('.needs-validation');
+    Array.prototype.slice.call(forms)
+      .forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+  })();
+
+  // Вывод ошибок в консоль (для отладки)
+  document.querySelector('form').addEventListener('submit', function(e) {
+    console.log('Submitting form...');
+    // Не останавливаем отправку формы, просто логируем
+  });
+</script>
+{% endblock content %}

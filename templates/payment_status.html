@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Статус платежа - Чистый Мир{% endblock title %}
+{% block content %}
+<div class="container mt-4">
+  <div class="custom-card p-3">
+    {% if error %}
+      <p class="text-danger">{{ error }}: {{ details }}</p>
+    {% else %}
+      <p>Status: {{ status }}</p>
+      <p>{{ message }}</p>
+      {% if pay %}
+        <p>Miqdor: {{ pay.amount }} so'm ({{ pay.plan.name }} tarifi)</p>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}
+    

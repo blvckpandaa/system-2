@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Категория дерева - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="section-title mb-4 text-center">Дерево категорий</h2>
+  {% if root_cats %}
+    <ul class="list-group tree-group">
+      {% for c in root_cats %}
+        <li class="list-group-item">
+          <a href="{% url 'category_detail' c.id %}" class="text-decoration-none fw-bold">{{ c.name }}</a>
+          {% if c.get_children %}
+            <ul class="list-group ms-4 mt-2">
+              {% for child in c.get_children %}
+                <li class="list-group-item">
+                  <a href="{% url 'category_detail' child.id %}" class="text-decoration-none">{{ child.name }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted text-center">Дерево категорий пусто.</p>
+  {% endif %}
+</div>
+
+<style>
+  .tree-group .list-group-item {
+    border: none;
+    background-color: transparent;
+    padding-left: 0;
+  }
+  .tree-group .list-group-item a {
+    color: #1F56A1;
+  }
+  .tree-group .list-group-item a:hover {
+    text-decoration: underline;
+  }
+</style>
+{% endblock content %}

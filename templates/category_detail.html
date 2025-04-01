@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Категория {{ cat.name }} - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow-sm p-4">
+    <h3 class="mb-3">{{ cat.name }}</h3>
+    {% if cat.image %}
+      <!-- Сжимаем и обрезаем, чтобы не было гигантского изображения -->
+      <img src="{{ cat.image.url }}" alt="{{ cat.name }}"
+           class="img-fluid mb-3 rounded"
+           style="max-height: 300px; object-fit: cover;">
+    {% endif %}
+    <hr>
+    <h5 class="mb-3">Объявления:</h5>
+    {% if ann_list %}
+      <!-- Сетка карточек объявлений -->
+      <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for a in ann_list %}
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            {% if a.images.first %}
+              <img src="{{ a.images.first.image.url }}" class="card-img-top" alt="{{ a.title }}"
+                   style="max-height: 200px; object-fit: cover;">
+            {% else %}
+              <img src="{% static 'no_image.png' %}" class="card-img-top"
+                   style="max-height: 200px; object-fit: cover;"
+                   alt="Нет изображения">
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ a.title }}</h5>
+              <p class="card-text text-muted flex-grow-1">{{ a.description|truncatechars:80 }}</p>
+              <h6 class="text-success">{{ a.price }} руб.</h6>
+              <a href="{% url 'announcement_detail' a.id %}" class="btn btn-outline-primary btn-sm mt-2">Подробнее</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">Объявлений пока нет.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}

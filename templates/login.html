@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Вход - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-4 col-md-7">
+      <div class="card shadow-lg border-0 rounded-4 p-4">
+        <h3 class="mb-4 text-center text-primary">Авторизация</h3>
+        <form method="POST">
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+
+          <div class="mb-3">
+            <label for="id_username" class="form-label">Имя пользователя или Email</label>
+            <input type="text" name="username" class="form-control rounded-pill" id="id_username" value="{{ form.username.value|default:'' }}">
+            <div class="text-danger small">{{ form.username.errors }}</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="id_password" class="form-label">Пароль</label>
+            <input type="password" name="password" class="form-control rounded-pill" id="id_password">
+            <div class="text-danger small">{{ form.password.errors }}</div>
+          </div>
+
+          <button class="btn btn-primary w-100 rounded-pill mt-3">Войти</button>
+        </form>
+
+        <p class="mt-4 text-center">
+          Нет аккаунта?
+          <a href="{% url 'register' %}" class="text-primary fw-bold">Зарегистрироваться</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Комментарии - Чистый Мир{% endblock title %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="section-title">Izohlar ro'yxati</h2>
+  {% if comments %}
+  <div class="list-group">
+    {% for c in comments %}
+    <div class="list-group-item">
+      <strong>{{ c.user.username }}</strong> - reyting: {{ c.rating }}
+      <p class="mb-0">{{ c.text }}</p>
+      <small class="text-muted">{{ c.created_at|date:"d M Y H:i" }}</small>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">Hozircha izohlar yo'q.</p>
+  {% endif %}
+  {% if form_errors %}
+    <div class="alert alert-danger mt-2">
+      <ul>
+      {% for field, errs in form_errors.items %}
+        {% for e in errs %}
+          <li>{{ e }}</li>
+        {% endfor %}
+      {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+</div>
+{% endblock content %}

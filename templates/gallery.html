@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Галерея - Чистый Мир{% endblock title %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="section-title">Galereya</h2>
+  {% if gallery %}
+  <div class="row row-cols-2 row-cols-md-4 g-3">
+    {% for g in gallery %}
+    <div class="col">
+      <div class="custom-card p-1">
+        <img src="{{ g.image.url }}" class="img-fluid rounded" alt="Galery item">
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">Galereya hozircha bo'sh.</p>
+  {% endif %}
+</div>
+{% endblock content %}

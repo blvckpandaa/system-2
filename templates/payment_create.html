@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Создание платежа - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      {% if message %}
+        <div class="alert alert-success" role="alert">
+          {{ message }}
+        </div>
+        {% if announcement %}
+          <div class="alert alert-info" role="alert">
+            <strong>E'lon:</strong> {{ announcement.title }}
+          </div>
+        {% endif %}
+      {% else %}
+        {% if payment %}
+          <div class="card">
+            <div class="card-header">
+              Платежная информация
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Подробности платежа</h5>
+              <p class="card-text">
+                Количество: <strong>{{ payment.amount }}</strong> ({{ payment.plan.name }} тариф)
+              </p>
+              <a href="{{ confirmation_url }}" class="btn btn-primary">Оплатить</a>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}
+

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Мои объявления - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="section-title mb-0">Мои объявления</h2>
+    <a href="{% url 'announcement_create' %}" class="btn btn-accent">
+      <i class="fas fa-plus me-2"></i>Создать объявление
+    </a>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body text-center">
+          <h3 class="fw-bold text-accent">{{ announcements.count }}</h3>
+          <p class="mb-0 text-muted">Всего объявлений</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body text-center">
+          <h3 class="fw-bold text-primary">{{ approved_count }}</h3>
+          <p class="mb-0 text-muted">Опубликовано</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body text-center">
+          <h3 class="fw-bold text-warning">{{ pending_count }}</h3>
+          <p class="mb-0 text-muted">На модерации</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body text-center">
+          <h3 class="fw-bold text-secondary">{{ draft_count|add:archived_count }}</h3>
+          <p class="mb-0 text-muted">Черновики/архив</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if announcements %}
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-light">
+          <tr>
+            <th>Заголовок</th>
+            <th>Категория</th>
+            <th>Статус</th>
+            <th>Цена</th>
+            <th>Дата</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in announcements %}
+          <tr>
+            <td>
+              <a href="{% url 'announcement_detail' item.id %}" class="text-decoration-none fw-medium">
+                {{ item.title }}
+              </a>
+            </td>
+            <td>{{ item.category.name|default:"Не указана" }}</td>
+            <td>
+              {% if item.status == 'published' %}
+                <span class="badge bg-success">Опубликовано</span>
+              {% elif item.status == 'draft' %}
+                <span class="badge bg-secondary">Черновик</span>
+              {% else %}
+                <span class="badge bg-dark">Архив</span>
+              {% endif %}
+            </td>
+            <td>{{ item.price }} руб</td>
+            <td>{{ item.created_at|date:"d.m.Y" }}</td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <a href="{% url 'announcement_detail' item.id %}" class="btn btn-outline-primary">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a href="{% url 'announcement_update' item.id %}" class="btn btn-outline-secondary">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="{% url 'announcement_delete' item.id %}" class="btn btn-outline-danger" 
+                   onclick="return confirm('Вы уверены, что хотите удалить это объявление?')">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center py-5 bg-light rounded-3">
+      <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+      <h4>У вас пока нет объявлений</h4>
+      <p class="text-muted">Создайте свое первое объявление прямо сейчас!</p>
+      <a href="{% url 'announcement_create' %}" class="btn btn-primary mt-2">
+        <i class="fas fa-plus me-2"></i>Создать объявление
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock content %} 

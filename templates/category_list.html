@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %} 
+{% block title %}Категории - Чистый Мир{% endblock title %}
+
+{% block hero %}
+<div class="bg-primary py-4 mb-5">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-6" data-aos="fade-right">
+        <h1 class="text-white fw-bold">Категории</h1>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-white-50">Главная</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page">Категории</li>
+          </ol>
+        </nav>
+      </div>
+      <div class="col-md-6 text-end" data-aos="fade-left">
+        <a href="{% url 'category_tree' %}" class="btn btn-light">
+          <i class="fas fa-sitemap me-2"></i>Дерево категорий
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock hero %}
+
+{% block content %}
+<div class="mb-4" data-aos="fade-up">
+  <h2 class="section-title mb-4">Все категории</h2>
+  <p class="text-muted">Выберите категорию для просмотра всех объявлений в ней</p>
+</div>
+
+{% if cats %}
+<div class="row g-4">
+  {% for cat in cats %}
+  <div class="col-xl-3 col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|mul:100 }}">
+    <a href="{% url 'category_detail' cat.id %}" class="text-decoration-none">
+      <div class="category-card">
+        {% if cat.image %}
+          <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="category-img">
+        {% else %}
+          <div class="category-placeholder"></div>
+        {% endif %}
+        <div class="category-overlay">
+          <h4 class="category-name">{{ cat.name }}</h4>
+          <div class="category-count">
+            <span class="badge rounded-pill bg-accent">
+              {{ cat.announcements.count }} объявлений
+            </span>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info text-center py-5" role="alert">
+  <i class="fas fa-folder-open fa-3x mb-3"></i>
+  <h4>Категории пока не добавлены</h4>
+  <p class="mb-0">Попробуйте зайти позже или обратитесь к администратору</p>
+</div>
+{% endif %}
+
+<style>
+  .category-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+    height: 220px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .category-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+  }
+  
+  .category-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .category-card:hover .category-img {
+    transform: scale(1.1);
+  }
+  
+  .category-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .category-placeholder::before {
+    content: "\f07c";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    font-size: 3rem;
+    color: #bbb;
+  }
+  
+  .category-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: white;
+    transition: all 0.3s ease;
+  }
+  
+  .category-card:hover .category-overlay {
+    background: linear-gradient(to top, rgba(var(--primary-dark-rgb), 0.8), transparent);
+  }
+  
+  .category-name {
+    margin: 0;
+    font-weight: 700;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  }
+  
+  .category-count {
+    margin-top: 5px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+  }
+  
+  .category-card:hover .category-count {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add RGB values to CSS variables for JS manipulation
+    document.documentElement.style.setProperty('--primary-dark-rgb', '0, 57, 203');
+    
+    // Add staggered animation to category cards
+    const cards = document.querySelectorAll('.category-card');
+    cards.forEach((card, index) => {
+      card.style.animationDelay = `${index * 0.1}s`;
+    });
+  });
+</script>
+{% endblock content %}

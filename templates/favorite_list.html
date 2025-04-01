@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Избранное - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Мои избранные объявления</h2>
+  {% if favs %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for f in favs %}
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            {% if f.announcement.images.first %}
+              <img src="{{ f.announcement.images.first.image.url }}" class="card-img-top"
+                   alt="{{ f.announcement.title }}"
+                   style="max-height: 200px; object-fit: cover;">
+            {% else %}
+              <img src="{% static 'no_image.png' %}" class="card-img-top"
+                   alt="Нет изображения"
+                   style="max-height: 200px; object-fit: cover;">
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">{{ f.announcement.title }}</h5>
+              <p class="card-text text-muted flex-grow-1">
+                {{ f.announcement.description|truncatechars:80 }}
+              </p>
+              <h6 class="text-success">{{ f.announcement.price }} руб.</h6>
+              <a href="{% url 'announcement_detail' f.announcement.id %}"
+                 class="btn btn-outline-primary btn-sm mt-2">Подробнее</a>
+            </div>
+            <div class="card-footer">
+              <form action="{% url 'favorite_delete' f.id %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-sm">Убрать из избранного</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">У вас нет избранных объявлений.</p>
+  {% endif %}
+</div>
+{% endblock content %}

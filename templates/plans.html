@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Тарифы - Чистый Мир{% endblock title %}
+
+{% block hero %}
+<div class="bg-primary py-4 mb-5">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-8" data-aos="fade-right">
+        <h1 class="text-white fw-bold">Тарифные планы</h1>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}" class="text-white-50">Главная</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page">Тарифы</li>
+          </ol>
+        </nav>
+      </div>
+      <div class="col-md-4 text-end text-white" data-aos="fade-left">
+        <p class="lead mb-0">Выберите подходящий тариф для продвижения вашего объявления</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock hero %}
+
+{% block content %}
+<section class="mb-5" data-aos="fade-up">
+  <h2 class="section-title mb-4">Наши тарифные планы</h2>
+  <p class="lead text-muted mb-5">Выберите наиболее подходящий тарифный план для вашего объявления, чтобы получить больше откликов и просмотров</p>
+  
+  {% if plans %}
+  <div class="row g-4 py-3">
+    {% for p in plans %}
+    <div class="col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|mul:100 }}">
+      <div class="card h-100 border-0 plan-card position-relative overflow-hidden">
+        <!-- Ribbon for Top plan -->
+        {% if p.name == 'top' %}
+        <div class="ribbon">Популярный</div>
+        {% endif %}
+        
+        <!-- Plan header -->
+        <div class="text-center p-4 plan-header {% if p.name == 'top' %}bg-accent{% elif p.name == 'standard' %}bg-primary{% else %}bg-secondary{% endif %}">
+          <h3 class="text-white fw-bold mb-0">{{ p.get_name_display }}</h3>
+        </div>
+        
+        <!-- Plan price -->
+        <div class="text-center p-4">
+          <div class="display-4 fw-bold mb-0">
+            {% if p.amount == 0 %}
+              Бесплатно
+            {% else %}
+              {{ p.amount }}
+            {% endif %}
+          </div>
+          {% if p.amount > 0 %}
+          <div class="text-muted">руб</div>
+          {% endif %}
+        </div>
+        
+        <!-- Plan features -->
+        <div class="px-4 pb-4">
+          <ul class="list-unstyled">
+            <li class="d-flex align-items-center mb-3">
+              <div class="feature-icon {% if p.name == 'top' %}bg-accent{% elif p.name == 'standard' %}bg-primary{% else %}bg-secondary{% endif %} bg-opacity-10 me-3">
+                <i class="fas fa-check {% if p.name == 'top' %}text-accent{% elif p.name == 'standard' %}text-primary{% else %}text-secondary{% endif %}"></i>
+              </div>
+              <span>Приоритет: <strong>{{ p.priority }}</strong></span>
+            </li>
+            <li class="d-flex align-items-center mb-3">
+              <div class="feature-icon {% if p.name == 'top' %}bg-accent{% elif p.name == 'standard' %}bg-primary{% else %}bg-secondary{% endif %} bg-opacity-10 me-3">
+                <i class="fas fa-check {% if p.name == 'top' %}text-accent{% elif p.name == 'standard' %}text-primary{% else %}text-secondary{% endif %}"></i>
+              </div>
+              <span>Срок размещения: <strong>{{ p.priority|add:7 }} дней</strong></span>
+            </li>
+            <li class="d-flex align-items-center mb-3">
+              <div class="feature-icon {% if p.name == 'top' %}bg-accent{% elif p.name == 'standard' %}bg-primary{% else %}bg-secondary{% endif %} bg-opacity-10 me-3">
+                <i class="fas fa-check {% if p.name == 'top' %}text-accent{% elif p.name == 'standard' %}text-primary{% else %}text-secondary{% endif %}"></i>
+              </div>
+              <span>{% if p.name == 'top' %}Показ в топе результатов{% elif p.name == 'standard' %}Выделение в списке{% else %}Стандартное размещение{% endif %}</span>
+            </li>
+            {% if p.name == 'top' %}
+            <li class="d-flex align-items-center mb-3">
+              <div class="feature-icon bg-accent bg-opacity-10 me-3">
+                <i class="fas fa-check text-accent"></i>
+              </div>
+              <span>Продвижение в социальных сетях</span>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+        
+        <!-- Plan footer -->
+        <div class="card-footer border-0 bg-white text-center p-4 mt-auto">
+          <a href="{% url 'announcement_create' %}" class="btn btn-lg {% if p.name == 'top' %}btn-accent{% elif p.name == 'standard' %}btn-primary{% else %}btn-secondary{% endif %} w-100">
+            Выбрать тариф
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  <!-- Benefits section -->
+  <div class="row mt-5 pt-5 g-4">
+    <div class="col-12 mb-4" data-aos="fade-up">
+      <h3 class="h4 fw-bold">Преимущества платных тарифов</h3>
+    </div>
+    
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+      <div class="d-flex">
+        <div class="feature-icon bg-primary bg-opacity-10 me-3">
+          <i class="fas fa-search text-primary"></i>
+        </div>
+        <div>
+          <h4 class="h5 fw-bold">Больше просмотров</h4>
+          <p class="text-muted">Ваше объявление будет показываться в топе поисковой выдачи, привлекая больше потенциальных клиентов</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+      <div class="d-flex">
+        <div class="feature-icon bg-primary bg-opacity-10 me-3">
+          <i class="fas fa-trophy text-primary"></i>
+        </div>
+        <div>
+          <h4 class="h5 fw-bold">Выше конкурентов</h4>
+          <p class="text-muted">Объявления с более высоким приоритетом отображаются выше других в результатах поиска</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+      <div class="d-flex">
+        <div class="feature-icon bg-primary bg-opacity-10 me-3">
+          <i class="fas fa-bolt text-primary"></i>
+        </div>
+        <div>
+          <h4 class="h5 fw-bold">Быстрые результаты</h4>
+          <p class="text-muted">Ускорьте продажу или сделку, привлекая больше внимания к вашему объявлению</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  {% else %}
+  <div class="alert alert-info text-center py-5" role="alert">
+    <i class="fas fa-info-circle fa-3x mb-3"></i>
+    <h4>Тарифы пока не добавлены</h4>
+    <p class="mb-0">Попробуйте зайти позже или обратитесь к администратору</p>
+  </div>
+  {% endif %}
+</section>
+
+<style>
+  .plan-card {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  }
+  
+  .plan-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+  
+  .plan-header {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+  }
+  
+  .plan-header::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: rgba(255,255,255,0.1);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    z-index: -1;
+  }
+  
+  .plan-header::after {
+    content: '';
+    position: absolute;
+    bottom: -25px;
+    left: -25px;
+    background: rgba(255,255,255,0.1);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    z-index: -1;
+  }
+  
+  .ribbon {
+    position: absolute;
+    top: 20px;
+    right: -30px;
+    background: var(--accent);
+    color: white;
+    font-weight: 600;
+    padding: 5px 30px;
+    transform: rotate(45deg);
+    z-index: 2;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  
+  .feature-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+</style>
+{% endblock content %}

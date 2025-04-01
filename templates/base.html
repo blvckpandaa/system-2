@@ -1,0 +1,594 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Чистый Мир{% endblock title %}</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- AOS Animation CSS -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #2E8B57; /* Основной зеленый цвет */
+      --primary-dark: #1a5e3a;
+      --primary-light: #4CAF50;
+      --accent: #FF6B6B; /* Акцентный цвет */
+      --accent-dark: #e05252;
+      --success: #4CAF50;
+      --info: #17a2b8;
+      --warning: #FFC107;
+      --danger: #e74c3c;
+      --background: #F8F9FA;
+      --text-dark: #2C3E50;
+      --text-light: #6C757D;
+      --border-radius: 12px;
+      --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-dark);
+      background-color: var(--background);
+      line-height: 1.6;
+      background-image: url('{% static "images/Frame 19.png" %}');
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+    
+    /* Полупрозрачный слой поверх фона для лучшей читаемости */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.65);
+      z-index: -1;
+    }
+    
+    .container {
+      background-color: rgba(255, 255, 255, 0.85);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 20px;
+    }
+    
+    main .container {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+    
+    /* Обновленные стили навигации */
+    .navbar {
+      background-color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.5rem;
+    }
+    
+    .navbar-nav .nav-link {
+      color: var(--text-dark);
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+    
+    .navbar-nav .nav-link:hover, 
+    .navbar-nav .nav-link.active {
+      color: var(--primary);
+      background-color: rgba(46, 139, 87, 0.1);
+    }
+    
+    .navbar-nav .nav-link i {
+      margin-right: 0.4rem;
+    }
+    
+    /* Кнопки */
+    .btn {
+      font-weight: 500;
+      border-radius: var(--border-radius);
+      padding: 0.5rem 1.5rem;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      border-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
+    }
+    
+    .btn-accent {
+      background-color: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    .btn-accent:hover {
+      background-color: #ff5252;
+      border-color: #ff5252;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-hero {
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .btn-hero:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    
+    .btn-outline-primary:hover {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    /* Карточки */
+    .card {
+      border: none;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--box-shadow);
+    }
+    
+    .shadow-custom {
+      box-shadow: var(--box-shadow);
+    }
+    
+    .rounded-custom {
+      border-radius: var(--border-radius);
+    }
+    
+    .card-title {
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+    
+    /* Секция героя */
+    .hero-section {
+      background: linear-gradient(rgba(0, 77, 64, 0.5), rgba(0, 77, 64, 0.7));
+      background-size: cover;
+      background-position: center;
+      height: 500px;
+      display: flex;
+      align-items: center;
+      color: white;
+      position: relative;
+      margin-bottom: 3rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+    
+    .hero-content {
+      z-index: 10;
+    }
+    
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+    
+    .hero-text {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      max-width: 600px;
+    }
+    
+    /* Заголовки секций */
+    .section-title {
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      position: relative;
+      display: inline-block;
+    }
+    
+    /* Стили для категорий */
+    .category-card {
+      transition: all 0.3s;
+      border: none;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .category-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .category-img {
+      height: 140px;
+      object-fit: cover;
+    }
+    
+    .category-icon {
+      font-size: 2.5rem;
+      color: var(--primary);
+    }
+    
+    /* Анимации */
+    .fade-up {
+      animation: fadeUp 1s ease-out;
+    }
+    
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Подвал */
+    footer {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 3rem 0;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin-top: 2rem;
+    }
+    
+    .footer-title {
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    
+    .footer-links {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .footer-links li {
+      margin-bottom: 0.75rem;
+    }
+    
+    .footer-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .footer-links a:hover {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    .social-icons a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      margin-right: 0.5rem;
+      transition: all 0.3s;
+    }
+    
+    .social-icons a:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+    }
+    
+    /* Медиа-запросы */
+    @media (max-width: 992px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      
+      .hero-section {
+        height: 400px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2rem;
+      }
+      
+      .hero-section {
+        height: 350px;
+        text-align: center;
+      }
+
+      .section-title {
+        font-size: 1.75rem;
+      }
+    }
+    
+    /* Дополнительные стили для отображения цветов и компонентов */
+    .bg-primary {
+      background-color: var(--primary) !important;
+    }
+    
+    .bg-accent {
+      background-color: var(--accent) !important;
+    }
+    
+    .text-primary {
+      color: var(--primary) !important;
+    }
+    
+    .text-accent {
+      color: var(--accent) !important;
+    }
+    
+    .btn-info {
+      background-color: var(--info);
+      border-color: var(--info);
+    }
+    
+    .btn-info:hover {
+      background-color: #138496;
+      border-color: #117a8b;
+    }
+    
+    .btn-success {
+      background-color: var(--success);
+      border-color: var(--success);
+    }
+    
+    .btn-success:hover {
+      background-color: #3d8b40;
+      border-color: #39833c;
+    }
+    
+    .btn-warning {
+      background-color: var(--warning);
+      border-color: var(--warning);
+      color: #212529;
+    }
+    
+    .btn-warning:hover {
+      background-color: #e0a800;
+      border-color: #d39e00;
+      color: #212529;
+    }
+    
+    .btn-danger {
+      background-color: var(--danger);
+      border-color: var(--danger);
+    }
+    
+    .btn-danger:hover {
+      background-color: #c0392b;
+      border-color: #b13427;
+    }
+  </style>
+  
+  {% block extra_css %}{% endblock extra_css %}
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'index' %}">
+        <i class="fas fa-leaf me-2"></i>Чистый Мир
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+          <li class="nav-item">
+            <a class="nav-link {% if 'announcement_list' in request.path %}active{% endif %}" href="{% url 'announcement_list' %}">
+              <i class="fas fa-th-large"></i> Объявления
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if 'category_list' in request.path %}active{% endif %}" href="{% url 'category_list' %}">
+              <i class="fas fa-th-list"></i> Категории
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if 'news_list' in request.path %}active{% endif %}" href="{% url 'news_list' %}">
+              <i class="fas fa-newspaper"></i> Новости
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == '/donation/' %}active{% endif %} text-accent fw-bold" href="{% url 'donation' %}">
+              <i class="fas fa-heart me-1"></i>Пожертвовать
+            </a>
+          </li>
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link position-relative {% if 'chat_list' in request.path %}active{% endif %}" href="{% url 'chat_list' %}">
+              <i class="fas fa-comments"></i> Чаты
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                new
+              </span>
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="fas fa-user-circle"></i> {{ user.username }}
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-id-card me-2"></i>Профиль</a></li>
+              <li><a class="dropdown-item" href="{% url 'announcement_user_list' %}"><i class="fas fa-clipboard-list me-2"></i>Мои объявления</a></li>
+              <li><a class="dropdown-item" href="{% url 'favorite_list' %}"><i class="fas fa-heart me-2"></i>Избранное</a></li>
+              <li><a class="dropdown-item" href="{% url 'chat_list' %}">
+                <i class="fas fa-comments me-2"></i>Мои чаты
+                {% if unread_messages_count > 0 %}
+                  <span class="badge bg-danger">{{ unread_messages_count }}</span>
+                {% endif %}
+              </a></li>
+              <li><a class="dropdown-item" href="{% url 'donation_list' %}">
+                <i class="fas fa-donate me-2"></i>Мои пожертвования
+              </a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Выход</a></li>
+            </ul>
+          </li>
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">
+              <i class="fas fa-sign-in-alt"></i> Вход
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">
+              <i class="fas fa-user-plus"></i> Регистрация
+            </a>
+          </li>
+          {% endif %}
+          <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+            <a href="{% url 'announcement_create' %}" class="btn btn-primary">
+              <i class="fas fa-plus me-1"></i> Добавить объявление
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  {% block hero %}{% endblock hero %}
+  
+  <!-- Main Content -->
+  <main class="flex-grow-1">
+    <div class="container py-4">
+      {% if messages %}
+      <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      
+      {% block content %}{% endblock content %}
+    </div>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="mt-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <h5 class="footer-title">О проекте</h5>
+          <p>Чистый Мир - платформа для экологичных объявлений. Наша миссия - продвигать устойчивое потребление и помогать людям обмениваться экологичными товарами.</p>
+          <div class="social-icons mt-3">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-telegram"></i></a>
+          </div>
+        </div>
+        
+        <div class="col-lg-2 col-md-4">
+          <h5 class="footer-title">Разделы</h5>
+          <ul class="footer-links">
+            <li><a href="{% url 'index' %}">Главная</a></li>
+            <li><a href="{% url 'announcement_list' %}">Объявления</a></li>
+            <li><a href="{% url 'category_list' %}">Категории</a></li>
+            <li><a href="{% url 'news_list' %}">Новости</a></li>
+          </ul>
+        </div>
+        
+        <div class="col-lg-2 col-md-4">
+          <h5 class="footer-title">Пользователям</h5>
+          <ul class="footer-links">
+            <li><a href="{% url 'register' %}">Регистрация</a></li>
+            <li><a href="{% url 'login' %}">Вход</a></li>
+            <li><a href="{% url 'announcement_create' %}">Добавить объявление</a></li>
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'profile' %}">Профиль</a></li>
+            {% endif %}
+          </ul>
+        </div>
+        
+        <div class="col-lg-4 col-md-4">
+          <h5 class="footer-title">Контакты</h5>
+          <ul class="footer-links">
+            <li><i class="fas fa-envelope me-2"></i>info@cleanworld.ru</li>
+            <li><i class="fas fa-phone me-2"></i>+7 (999) 123-45-67</li>
+            <li><i class="fas fa-map-marker-alt me-2"></i>г. Москва, ул. Экологическая, 42</li>
+          </ul>
+        </div>
+      </div>
+      <hr class="my-4">
+      <div class="text-center">
+        <p class="mb-0">&copy; 2023 Чистый Мир. Все права защищены.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JavaScript Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- AOS Animation JS -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  
+  <script>
+    // Initialize AOS animation
+    document.addEventListener('DOMContentLoaded', function() {
+      AOS.init({
+        duration: 800,
+        once: true
+      });
+    });
+  </script>
+  
+  {% block extra_js %}{% endblock extra_js %}
+</body>
+</html>

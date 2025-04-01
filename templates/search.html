@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Результаты поиска - Чистый Мир{% endblock title %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="section-title">Qidiruv natijalari</h2>
+  <form method="GET" class="mb-4">
+    <input type="text" name="q" class="form-control" placeholder="Qidirish..." value="{{ query }}">
+  </form>
+
+  <div class="mb-3">
+    <h5>E'lonlar:</h5>
+    {% if announcements %}
+    <ul>
+      {% for a in announcements %}
+      <li><a href="{% url 'announcement_detail' a.id %}">{{ a.title }}</a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted">E'lon topilmadi</p>
+    {% endif %}
+  </div>
+
+  <div class="mb-3">
+    <h5>Kategoriyalar:</h5>
+    {% if categories %}
+    <ul>
+      {% for c in categories %}
+      <li><a href="{% url 'category_detail' c.id %}">{{ c.name }}</a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted">Kategoriya topilmadi</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}

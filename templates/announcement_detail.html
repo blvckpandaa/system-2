@@ -1,0 +1,460 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}{{ announcement.title }} - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb" class="mt-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'announcement_list' %}">Объявления</a></li>
+      <li class="breadcrumb-item active">{{ announcement.title }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Изображения и галерея -->
+    <div class="col-lg-7 mb-4">
+      <div class="card rounded-custom shadow-custom overflow-hidden">
+        {% if announcement.images.all %}
+          <div id="announcementCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+              {% for image in announcement.images.all %}
+              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <img src="{{ image.image.url }}" class="d-block w-100" style="height: 450px; object-fit: cover;" alt="{{ announcement.title }}">
+              </div>
+              {% endfor %}
+            </div>
+            {% if announcement.images.all.count > 1 %}
+            <button class="carousel-control-prev" type="button" data-bs-target="#announcementCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon"></span>
+              <span class="visually-hidden">Предыдущее</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#announcementCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon"></span>
+              <span class="visually-hidden">Следующее</span>
+            </button>
+            {% endif %}
+          </div>
+          
+          <!-- Миниатюры -->
+          {% if announcement.images.all.count > 1 %}
+          <div class="d-flex mt-2 overflow-auto p-2 thumbnails-container">
+            {% for image in announcement.images.all %}
+            <div class="thumbnail-item mx-1" data-slide-index="{{ forloop.counter0 }}">
+              <img src="{{ image.image.url }}" class="img-thumbnail" style="width: 80px; height: 60px; object-fit: cover; cursor: pointer;" alt="Миниатюра {{ forloop.counter }}">
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% else %}
+          <div class="bg-light d-flex align-items-center justify-content-center" style="height: 450px;">
+            <div class="text-center">
+              <i class="fas fa-image fa-5x text-muted mb-3"></i>
+              <p class="text-muted">Изображения отсутствуют</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Информация об объявлении -->
+    <div class="col-lg-5">
+      <div class="card rounded-custom shadow-custom h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h1 class="mb-2">{{ announcement.title }}</h1>
+              <p class="text-muted mb-3">
+                <i class="far fa-calendar-alt me-2"></i>Опубликовано: {{ announcement.created_at|date:"d.m.Y" }}
+              </p>
+            </div>
+            <span class="badge bg-accent fs-5 px-3 py-2">{{ announcement.price }} руб.</span>
+          </div>
+          
+          <!-- Кнопка чата (добавлена вверху карточки) -->
+          {% if user.is_authenticated and user != announcement.user %}
+          <div class="mb-4">
+            <form action="{% url 'chat_create' %}" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="announcement_id" value="{{ announcement.id }}">
+              <button type="submit" class="btn btn-primary py-3 w-100 fs-5">
+                <i class="fas fa-comments me-2"></i>Написать продавцу
+              </button>
+            </form>
+          </div>
+          {% endif %}
+          
+          <div class="announcement-meta mb-4">
+            <div class="row g-2">
+              <div class="col-6">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-tag text-primary me-2"></i>
+                  <span>{% if announcement.category %}{{ announcement.category.name }}{% else %}Без категории{% endif %}</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                  <span>{{ announcement.location|default:"Местоположение не указано" }}</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-eye text-primary me-2"></i>
+                  <span>{{ announcement.views }} просмотров</span>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="d-flex align-items-center">
+                  <i class="fas fa-heart text-primary me-2"></i>
+                  <span>{{ announcement.favorites.count }} в избранном</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <div class="d-flex align-items-center mb-3">
+              <div class="bg-light rounded-circle me-3" style="width: 50px; height: 50px; overflow: hidden;">
+                {% if announcement.user.profile.avatar %}
+                  <img src="{{ announcement.user.profile.avatar.url }}" alt="{{ announcement.user.username }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                  <div class="d-flex align-items-center justify-content-center h-100">
+                    <i class="fas fa-user text-primary fs-4"></i>
+                  </div>
+                {% endif %}
+              </div>
+              <div>
+                <h5 class="mb-0">{{ announcement.user.username }}</h5>
+                <p class="text-muted mb-0 small">На сайте с {{ announcement.user.date_joined|date:"d.m.Y" }}</p>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2 mb-4">
+              {% if user.is_authenticated %}
+              <form action="{% url 'favorite_add' %}" method="POST" class="d-grid">
+                {% csrf_token %}
+                <input type="hidden" name="announcement" value="{{ announcement.id }}">
+                <button type="submit" class="btn btn-outline-danger">
+                  <i class="{% if is_favorite %}fas{% else %}far{% endif %} fa-heart me-2"></i>
+                  {% if is_favorite %}Удалить из избранного{% else %}Добавить в избранное{% endif %}
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+          
+          <!-- Контактная информация -->
+          <div class="contact-info mb-4">
+            <h5 class="border-bottom pb-2 mb-3">Контактная информация</h5>
+            
+            <div class="d-grid gap-2">
+              {% if announcement.phone %}
+              <a href="tel:{{ announcement.phone }}" class="btn btn-success py-2">
+                <i class="fas fa-phone-alt me-2"></i>{{ announcement.phone }}
+              </a>
+              {% endif %}
+              
+              {% if user.is_authenticated and user != announcement.user %}
+              <form action="{% url 'chat_create' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="announcement_id" value="{{ announcement.id }}">
+                <button type="submit" class="btn btn-primary py-3 w-100 fs-5">
+                  <i class="fas fa-comments me-2"></i>Написать продавцу
+                </button>
+              </form>
+              {% endif %}
+              
+              {% if announcement.user.profile.telegram %}
+              <a href="https://t.me/{{ announcement.user.profile.telegram }}" class="btn btn-info py-2 text-white" target="_blank">
+                <i class="fab fa-telegram-plane me-2"></i>Написать в Telegram
+              </a>
+              {% endif %}
+              
+              {% if announcement.user.email %}
+              <a href="mailto:{{ announcement.user.email }}" class="btn btn-outline-primary py-2">
+                <i class="fas fa-envelope me-2"></i>Написать на Email
+              </a>
+              {% endif %}
+              
+              <button type="button" class="btn btn-outline-secondary py-2" data-bs-toggle="modal" data-bs-target="#shareModal">
+                <i class="fas fa-share-alt me-2"></i>Поделиться объявлением
+              </button>
+            </div>
+          </div>
+          
+          {% if announcement.plan %}
+          <div class="mb-4">
+            <div class="alert alert-info mb-0 d-flex align-items-center" role="alert">
+              <i class="fas fa-star me-2"></i>
+              <div>
+                <strong>{{ announcement.get_plan_display }}</strong> объявление
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Описание и детали -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card rounded-custom shadow-custom mb-4">
+        <div class="card-header bg-white">
+          <h3 class="mb-0">Описание</h3>
+        </div>
+        <div class="card-body">
+          <div class="description-text">
+            {{ announcement.description|linebreaks }}
+          </div>
+          
+          <hr class="my-4">
+          
+          <div class="row g-3">
+            {% if announcement.condition %}
+            <div class="col-md-4">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-info-circle text-primary fs-4 me-3"></i>
+                <div>
+                  <p class="text-muted mb-0">Состояние</p>
+                  <h5 class="mb-0">{{ announcement.get_condition_display }}</h5>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            
+            {% if announcement.eco_material %}
+            <div class="col-md-4">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-leaf text-primary fs-4 me-3"></i>
+                <div>
+                  <p class="text-muted mb-0">Экологичный материал</p>
+                  <h5 class="mb-0">{{ announcement.eco_material }}</h5>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+            
+            {% if announcement.time_to_recycle %}
+            <div class="col-md-4">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-recycle text-primary fs-4 me-3"></i>
+                <div>
+                  <p class="text-muted mb-0">Время переработки</p>
+                  <h5 class="mb-0">{{ announcement.time_to_recycle }}</h5>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Местоположение на карте -->
+  {% if announcement.location %}
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card rounded-custom shadow-custom mb-4">
+        <div class="card-header bg-white">
+          <h3 class="mb-0">Местоположение</h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="map-container" style="height: 300px; border-radius: var(--border-radius);">
+            <iframe 
+              width="100%" 
+              height="100%" 
+              frameborder="0" 
+              scrolling="no" 
+              marginheight="0" 
+              marginwidth="0" 
+              src="https://maps.google.com/maps?width=100%25&amp;height=300&amp;hl=ru&amp;q={{ announcement.location|urlencode }}&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
+              style="border-radius: 0 0 var(--border-radius) var(--border-radius);">
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  
+  <!-- Похожие объявления -->
+  {% if similar_announcements %}
+  <div class="row mt-4">
+    <div class="col-12">
+      <h3 class="mb-4">Похожие объявления</h3>
+      <div class="row g-4">
+        {% for ann in similar_announcements %}
+        <div class="col-lg-3 col-md-6">
+          <div class="card h-100 shadow-custom">
+            <div class="position-relative">
+              {% if ann.images.all %}
+                <img src="{{ ann.images.first.image.url }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="{{ ann.title }}">
+              {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                  <i class="fas fa-image fa-3x text-muted"></i>
+                </div>
+              {% endif %}
+              <span class="position-absolute top-0 end-0 badge bg-accent m-2">{{ ann.price }} руб</span>
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">{{ ann.title|truncatechars:40 }}</h5>
+              <p class="card-text small text-muted mb-3">{{ ann.description|truncatewords:10 }}</p>
+              <a href="{% url 'announcement_detail' ann.id %}" class="btn btn-sm btn-outline-primary w-100">Подробнее</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% if user.is_authenticated and user != announcement.user %}
+<!-- Фиксированная кнопка чата -->
+<div class="fixed-bottom p-3 d-flex justify-content-center" style="z-index: 100;">
+  <form action="{% url 'chat_create' %}" method="POST" class="w-100" style="max-width: 500px;">
+    {% csrf_token %}
+    <input type="hidden" name="announcement_id" value="{{ announcement.id }}">
+    <button type="submit" class="btn btn-primary py-3 w-100 fs-5 shadow-lg rounded-pill">
+      <i class="fas fa-comments me-2"></i>Написать продавцу
+    </button>
+  </form>
+</div>
+{% endif %}
+
+{% if user.is_authenticated and user == announcement.user %}
+<div class="fixed-bottom p-3 bg-light border-top d-flex justify-content-center" style="transform: translateY(100%); transition: transform 0.3s ease-in-out;" id="ownerPanel">
+  <div class="btn-group">
+    <a href="{% url 'announcement_update' announcement.id %}" class="btn btn-primary">
+      <i class="fas fa-edit me-2"></i>Редактировать
+    </a>
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+      <i class="fas fa-trash-alt me-2"></i>Удалить
+    </button>
+    {% if announcement.is_active %}
+    <a href="{% url 'announcement_deactivate' announcement.id %}" class="btn btn-warning">
+      <i class="fas fa-eye-slash me-2"></i>Деактивировать
+    </a>
+    {% else %}
+    <a href="{% url 'announcement_activate' announcement.id %}" class="btn btn-success">
+      <i class="fas fa-eye me-2"></i>Активировать
+    </a>
+    {% endif %}
+    {% if announcement.plan %}
+    <a href="{% url 'upgrade_announcement' announcement.id %}" class="btn btn-info">
+      <i class="fas fa-star me-2"></i>Изменить тариф
+    </a>
+    {% else %}
+    <a href="{% url 'upgrade_announcement' announcement.id %}" class="btn btn-info">
+      <i class="fas fa-arrow-up me-2"></i>Продвинуть
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal для подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Вы уверены, что хотите удалить объявление "{{ announcement.title }}"?
+        Это действие нельзя будет отменить.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <a href="{% url 'announcement_delete' announcement.id %}" class="btn btn-danger">
+          <i class="fas fa-trash-alt me-2"></i>Удалить
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Модальное окно для "Поделиться" -->
+<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shareModalLabel">Поделиться объявлением</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex justify-content-center gap-3 mb-4">
+          <a href="https://t.me/share/url?url={{ request.build_absolute_uri }}&text={{ announcement.title }}" class="btn btn-info" target="_blank">
+            <i class="fab fa-telegram-plane fa-lg"></i>
+          </a>
+          <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" class="btn btn-primary" target="_blank">
+            <i class="fab fa-facebook-f fa-lg"></i>
+          </a>
+          <a href="https://vk.com/share.php?url={{ request.build_absolute_uri }}" class="btn btn-primary" style="background-color: #4a76a8;" target="_blank">
+            <i class="fab fa-vk fa-lg"></i>
+          </a>
+          <a href="https://api.whatsapp.com/send?text={{ announcement.title }} {{ request.build_absolute_uri }}" class="btn btn-success" target="_blank">
+            <i class="fab fa-whatsapp fa-lg"></i>
+          </a>
+          <a href="mailto:?subject={{ announcement.title }}&body={{ request.build_absolute_uri }}" class="btn btn-secondary">
+            <i class="fas fa-envelope fa-lg"></i>
+          </a>
+        </div>
+        
+        <div class="input-group">
+          <input type="text" id="shareUrl" class="form-control" value="{{ request.build_absolute_uri }}" readonly>
+          <button class="btn btn-primary" type="button" onclick="copyShareUrl()">
+            <i class="fas fa-copy me-1"></i> Копировать
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  // JavaScript код для страницы деталей объявления
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    // Показываем панель владельца если это владелец объявления
+    if (document.getElementById('ownerPanel')) {
+      setTimeout(function() {
+        document.getElementById('ownerPanel').style.transform = 'translateY(0)';
+      }, 1000);
+    }
+    
+    // Инициализация миниатюр карусели
+    var thumbnails = document.querySelectorAll('.thumbnail-item');
+    thumbnails.forEach(function(thumbnail) {
+      thumbnail.addEventListener('click', function() {
+        var slideIndex = this.getAttribute('data-slide-index');
+        var carouselElement = document.getElementById('announcementCarousel');
+        if (carouselElement && slideIndex) {
+          var carousel = new bootstrap.Carousel(carouselElement);
+          carousel.to(parseInt(slideIndex));
+        }
+      });
+    });
+  });
+  
+  function copyShareUrl() {
+    var copyText = document.getElementById("shareUrl");
+    if (copyText) {
+      copyText.select();
+      copyText.setSelectionRange(0, 99999);
+      document.execCommand("copy");
+      alert("Ссылка скопирована в буфер обмена!");
+    }
+  }
+</script>
+{% endblock extra_js %}
+{% endblock content %}
