@@ -74,6 +74,8 @@
                 <span class="badge bg-success">Опубликовано</span>
               {% elif item.status == 'draft' %}
                 <span class="badge bg-secondary">Черновик</span>
+              {% elif item.status == 'pending' %}
+                <span class="badge bg-warning">На модерации</span>
               {% else %}
                 <span class="badge bg-dark">Архив</span>
               {% endif %}

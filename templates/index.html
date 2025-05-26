@@ -5,61 +5,161 @@
 
 {% block hero %}
 <section class="hero-section">
-  <div class="container hero-content">
+  <div class="container hero-content px-md-5 py-4 py-md-5">
     <div class="row align-items-center">
-      <div class="col-lg-7 fade-up">
-        <h1 class="hero-title text-primary">Экологичные решения для чистого мира</h1>
-        <p class="hero-text text-primary">Присоединяйтесь к нашему сообществу, чтобы покупать, продавать и обменивать экологичные товары. Вместе мы создаём устойчивое будущее!</p>
-        <div class="d-flex gap-3 flex-wrap mt-4">
+      <div class="col-lg-7 col-md-6 mb-4 mb-md-0 text-center text-md-start">
+        <h1 class="hero-title text-success">Экологичные решения для <span class="text-success position-relative">чистого мира
+          <svg class="position-absolute w-100" style="height: 8px; bottom: 0; left: 0; z-index: -1;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 10">
+            <path d="M0,0 Q50,10 100,0" stroke="#4CAF50" stroke-width="8" fill="none" />
+          </svg>
+        </span></h1>
+        <p class="hero-text">Присоединяйтесь к нашему сообществу, чтобы покупать, продавать и обменивать экологичные товары. Вместе мы создаём устойчивое будущее!</p>
+        <div class="d-flex gap-3 flex-wrap mt-4 justify-content-center justify-content-md-start">
           <a href="{% url 'announcement_list' %}" class="btn btn-light btn-hero">
-            <i class="fas fa-search me-2"></i>Смотреть объявления
+            <i class="fas fa-search me-2"></i><span>Смотреть объявления</span>
           </a>
-          <a href="{% url 'announcement_create' %}" class="btn btn-accent btn-hero">
-            <i class="fas fa-plus me-2"></i>Разместить объявление
+          <a href="{% if user.is_authenticated %}{% url 'announcement_create' %}{% else %}{% url 'login' %}?next={% url 'announcement_create' %}{% endif %}" class="btn btn-accent btn-hero">
+            <i class="fas fa-plus me-2"></i><span>Разместить объявление</span>
           </a>
         </div>
       </div>
-      <div class="col-lg-5 d-none d-lg-block text-center">
-        <img src="{% static 'images/dunyo.png' %}" class="img-fluid rounded-circle shadow-lg" style="max-height: 300px; width: auto;" alt="Мать Земля">
+      <div class="col-lg-5 col-md-6 d-none d-md-block text-center">
+        <div class="image-container position-relative">
+          <div class="blob-animation position-absolute" style="width: 100%; height: 100%; top: -10px; left: 50%; transform: translateX(-50%); border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; animation: blob 8s ease-in-out infinite alternate;"></div>
+          <img src="{% static 'images/dunyo.png' %}" class="img-fluid rounded-circle position-relative" style="max-height: 300px; width: auto; z-index: 5;" alt="Мать Земля">
+        </div>
       </div>
     </div>
   </div>
 </section>
+
+<style>
+  @keyframes blob {
+    0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+    50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+    100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  }
+  
+  .hero-title, .hero-text {
+    color: #2C3E50 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .hero-section {
+    padding: 0;
+    margin-bottom: 2rem;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+    line-height: 1.2;
+  }
+  
+  .hero-text {
+    font-size: 1.1rem;
+  }
+  
+  .btn-hero {
+    padding: 0.7rem 1.75rem;
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 1199.98px) {
+    .hero-title {
+      font-size: 2.25rem;
+    }
+    
+    .image-container img {
+      max-height: 250px;
+    }
+  }
+  
+  @media (max-width: 991.98px) {
+    .hero-title {
+      font-size: 2rem;
+    }
+    
+    .hero-text {
+      font-size: 1rem;
+    }
+    
+    .image-container img {
+      max-height: 220px;
+    }
+  }
+  
+  @media (max-width: 767.98px) {
+    .hero-title {
+      font-size: 1.75rem;
+    }
+    
+    .hero-text {
+      font-size: 0.95rem;
+    }
+    
+    .hero-section {
+      height: auto;
+      padding: 2rem 0;
+    }
+    
+    .btn-hero {
+      padding: 0.6rem 1.5rem;
+      font-size: 0.95rem;
+    }
+  }
+  
+  @media (max-width: 575.98px) {
+    .hero-title {
+      font-size: 1.5rem;
+    }
+    
+    .hero-text {
+      font-size: 0.9rem;
+    }
+    
+    .btn-hero {
+      padding: 0.5rem 1.25rem;
+      font-size: 0.9rem;
+    }
+  }
+</style>
 {% endblock hero %}
 
 {% block content %}
 <!-- Categories Section -->
 <section class="mb-5" data-aos="fade-up">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="section-title">Популярные категории</h2>
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <h2 class="section-title mb-3 mb-md-0">Популярные категории</h2>
     <a href="{% url 'category_list' %}" class="btn btn-outline-primary rounded-pill">
-      <i class="fas fa-th-list me-2"></i>Все категории
+      <i class="fas fa-th-list me-2"></i><span class="d-none d-sm-inline">Все категории</span><span class="d-inline d-sm-none">Все</span>
     </a>
   </div>
-  <div class="row g-4">
+  <div class="row g-3 g-md-4">
     {% if categories %}
       {% for cat in categories %}
-      <div class="col-lg-2 col-md-4 col-6">
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="zoom-in" data-aos-delay="{{ forloop.counter|mul:50 }}">
         <a href="{% url 'category_detail' cat.id %}" class="text-decoration-none">
           <div class="card category-card text-center h-100">
             {% if cat.image %}
-              <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="category-img">
+              <div class="overflow-hidden">
+                <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="category-img transition-transform" style="transform: scale(1); transition: transform 0.5s;">
+              </div>
             {% else %}
-              <div class="d-flex align-items-center justify-content-center bg-light" style="height: 140px;">
-                <div class="category-icon">
-                  <i class="fas fa-recycle"></i>
+              <div class="d-flex align-items-center justify-content-center bg-light overflow-hidden" style="height: 120px;">
+                <div class="category-icon transition-transform" style="transform: scale(1); transition: transform 0.5s;">
+                  <i class="fas fa-recycle fa-2x fa-md-3x text-primary"></i>
                 </div>
               </div>
             {% endif %}
-            <div class="card-body">
-              <h5 class="card-title">{{ cat.name }}</h5>
+            <div class="card-body p-2 p-md-3">
+              <h5 class="card-title mb-0 fs-6">{{ cat.name }}</h5>
             </div>
           </div>
         </a>
       </div>
       {% endfor %}
     {% else %}
-      <div class="col-12 text-center py-5">
+      <div class="col-12 text-center py-4">
         <p class="text-muted">Категории пока не добавлены</p>
       </div>
     {% endif %}
@@ -68,22 +168,22 @@
 
 <!-- Latest Announcements -->
 <section class="mb-5" data-aos="fade-up" data-aos-delay="100">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="section-title">Новые объявления</h2>
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <h2 class="section-title mb-3 mb-md-0">Новые объявления</h2>
     <a href="{% url 'announcement_list' %}" class="btn btn-outline-primary rounded-pill">
-      <i class="fas fa-list me-2"></i>Все объявления
+      <i class="fas fa-list me-2"></i><span class="d-none d-sm-inline">Все объявления</span><span class="d-inline d-sm-none">Все</span>
     </a>
   </div>
-  <div class="row g-4">
-    {% if announcements %}
-      {% for ann in announcements %}
-      <div class="col-lg-4 col-md-6">
-        <div class="card h-100 shadow-custom">
-          <div class="position-relative">
+  <div class="row g-3 g-md-4">
+    {% if elonlar %}
+      {% for ann in elonlar %}
+      <div class="col-12 col-sm-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|mul:50 }}">
+        <div class="card h-100 shadow-custom border-0">
+          <div class="position-relative overflow-hidden">
             {% if ann.images.all %}
-              <img src="{{ ann.images.first.image.url }}" class="card-img-top" style="height: 220px; object-fit: cover;" alt="{{ ann.title }}">
+              <img src="{{ ann.images.first.image.url }}" class="card-img-top transition-transform" style="height: 180px; object-fit: cover; transform: scale(1); transition: transform 0.5s;" alt="{{ ann.title }}">
             {% else %}
-              <div class="bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+              <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
                 <i class="fas fa-image fa-3x text-muted"></i>
               </div>
             {% endif %}
@@ -93,25 +193,30 @@
             </span>
           </div>
           
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title mb-3">{{ ann.title }}</h5>
-            <p class="card-text text-muted mb-4">{{ ann.description|truncatewords:15 }}</p>
+          <div class="card-body d-flex flex-column p-3">
+            <div class="mb-2">
+              {% if ann.category %}
+                <span class="badge bg-light text-primary border border-primary-subtle px-2 py-1 rounded-pill">{{ ann.category.name }}</span>
+              {% endif %}
+            </div>
+            <h5 class="card-title mb-2">{{ ann.title }}</h5>
+            <p class="card-text text-muted mb-3 small">{{ ann.description|truncatewords:15 }}</p>
             
             <div class="mt-auto">
               <div class="d-flex justify-content-between text-muted small mb-3">
-                <div><i class="fas fa-map-marker-alt me-1"></i>{{ ann.location|default:"Не указано" }}</div>
+                <div class="text-truncate me-2"><i class="fas fa-map-marker-alt me-1"></i>{{ ann.location|default:"Не указано" }}</div>
                 <div><i class="far fa-calendar-alt me-1"></i>{{ ann.created_at|date:"d.m.Y" }}</div>
               </div>
               
               <div class="d-flex justify-content-between">
-                <a href="{% url 'announcement_detail' ann.id %}" class="btn btn-primary px-4">
-                  <i class="fas fa-info-circle me-1"></i>Подробнее
+                <a href="{% url 'announcement_detail' ann.id %}" class="btn btn-primary btn-sm px-3">
+                  <i class="fas fa-info-circle me-1"></i><span class="d-none d-sm-inline">Подробнее</span><span class="d-inline d-sm-none">Открыть</span>
                 </a>
                 {% if user.is_authenticated %}
                 <form action="{% url 'favorite_add' %}" method="POST">
                   {% csrf_token %}
                   <input type="hidden" name="announcement" value="{{ ann.id }}">
-                  <button type="submit" class="btn btn-outline-danger">
+                  <button type="submit" class="btn btn-outline-danger btn-sm">
                     <i class="far fa-heart"></i>
                   </button>
                 </form>
@@ -123,11 +228,11 @@
       </div>
       {% endfor %}
     {% else %}
-      <div class="col-12 text-center py-5 bg-light rounded-custom">
+      <div class="col-12 text-center py-4 bg-light rounded-custom">
         <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
         <h4>Объявления пока не добавлены</h4>
         <p class="text-muted">Будьте первым, кто разместит объявление на нашей платформе!</p>
-        <a href="{% url 'announcement_create' %}" class="btn btn-primary mt-3">
+        <a href="{% if user.is_authenticated %}{% url 'announcement_create' %}{% else %}{% url 'login' %}?next={% url 'announcement_create' %}{% endif %}" class="btn btn-primary mt-3">
           <i class="fas fa-plus me-2"></i>Разместить объявление
         </a>
       </div>
@@ -136,226 +241,311 @@
 </section>
 
 <!-- How It Works -->
-<section class="mb-5 py-5 bg-light rounded-custom" data-aos="fade-up" data-aos-delay="150">
-  <div class="container">
-    <h2 class="section-title text-center mb-5">Как это работает</h2>
-    <div class="row g-4 text-center">
-      <div class="col-md-3">
-        <div class="p-3">
-          <div class="bg-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4 shadow-custom" style="width: 100px; height: 100px;">
-            <i class="fas fa-user-plus fa-3x text-primary"></i>
+<section class="mb-5 py-4 py-md-5 bg-light rounded-custom position-relative overflow-hidden" data-aos="fade-up" data-aos-delay="150">
+  <div class="position-absolute" style="width: 300px; height: 300px; background: rgba(46, 139, 87, 0.1); border-radius: 50%; top: -150px; right: -100px;"></div>
+  <div class="position-absolute" style="width: 200px; height: 200px; background: rgba(255, 107, 107, 0.1); border-radius: 50%; bottom: -100px; left: -50px;"></div>
+  
+  <div class="container position-relative">
+    <h2 class="section-title text-center mb-4 mb-md-5">Как это работает</h2>
+    <div class="row g-3 g-md-4 text-center">
+      <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="100">
+        <div class="p-2 p-md-3">
+          <div class="bg-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3 mb-md-4 shadow-custom position-relative icon-container">
+            <div class="position-absolute bg-primary opacity-10" style="width: 100%; height: 100%; border-radius: 50%; transform: scale(0); transition: transform 0.3s;"></div>
+            <i class="fas fa-user-plus fa-2x fa-md-3x text-primary"></i>
           </div>
-          <h4 class="mb-3">Регистрация</h4>
-          <p class="text-muted">Создайте аккаунт на нашей платформе за считанные минуты</p>
+          <h4 class="mb-2 mb-md-3 fs-5 fs-md-4">Регистрация</h4>
+          <p class="text-muted small mb-0">Создайте аккаунт на нашей платформе за считанные минуты</p>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="p-3">
-          <div class="bg-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4 shadow-custom" style="width: 100px; height: 100px;">
-            <i class="fas fa-edit fa-3x text-primary"></i>
+      <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="200">
+        <div class="p-2 p-md-3">
+          <div class="bg-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3 mb-md-4 shadow-custom position-relative icon-container">
+            <div class="position-absolute bg-primary opacity-10" style="width: 100%; height: 100%; border-radius: 50%; transform: scale(0); transition: transform 0.3s;"></div>
+            <i class="fas fa-edit fa-2x fa-md-3x text-primary"></i>
           </div>
-          <h4 class="mb-3">Создание</h4>
-          <p class="text-muted">Разместите объявление о товаре или услуге с фотографиями</p>
+          <h4 class="mb-2 mb-md-3 fs-5 fs-md-4">Создание</h4>
+          <p class="text-muted small mb-0">Разместите объявление о товаре или услуге с фотографиями</p>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="p-3">
-          <div class="bg-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4 shadow-custom" style="width: 100px; height: 100px;">
-            <i class="fas fa-comments fa-3x text-primary"></i>
+      <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="300">
+        <div class="p-2 p-md-3">
+          <div class="bg-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3 mb-md-4 shadow-custom position-relative icon-container">
+            <div class="position-absolute bg-primary opacity-10" style="width: 100%; height: 100%; border-radius: 50%; transform: scale(0); transition: transform 0.3s;"></div>
+            <i class="fas fa-comments fa-2x fa-md-3x text-primary"></i>
           </div>
-          <h4 class="mb-3">Общение</h4>
-          <p class="text-muted">Обсудите детали с покупателями или продавцами</p>
+          <h4 class="mb-2 mb-md-3 fs-5 fs-md-4">Общение</h4>
+          <p class="text-muted small mb-0">Обсудите детали с покупателями или продавцами</p>
         </div>
       </div>
-      <div class="col-md-3">
-        <div class="p-3">
-          <div class="bg-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-4 shadow-custom" style="width: 100px; height: 100px;">
-            <i class="fas fa-exchange-alt fa-3x text-primary"></i>
+      <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="400">
+        <div class="p-2 p-md-3">
+          <div class="bg-white rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3 mb-md-4 shadow-custom position-relative icon-container">
+            <div class="position-absolute bg-primary opacity-10" style="width: 100%; height: 100%; border-radius: 50%; transform: scale(0); transition: transform 0.3s;"></div>
+            <i class="fas fa-exchange-alt fa-2x fa-md-3x text-primary"></i>
           </div>
-          <h4 class="mb-3">Сделка</h4>
-          <p class="text-muted">Завершите сделку и оставьте отзыв о вашем опыте</p>
+          <h4 class="mb-2 mb-md-3 fs-5 fs-md-4">Сделка</h4>
+          <p class="text-muted small mb-0">Завершите сделку и оставьте отзыв о вашем опыте</p>
         </div>
       </div>
     </div>
     
-    <div class="text-center mt-5">
-      <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">
-        <i class="fas fa-rocket me-2"></i>Начать сейчас
+    <div class="text-center mt-4 mt-md-5">
+      {% if not user.is_authenticated %}
+      <a href="{% url 'register' %}" class="btn btn-primary px-4 px-md-5 pulse-animation">
+        <i class="fas fa-rocket me-2"></i><span>Начать сейчас</span>
       </a>
+      {% endif %}
     </div>
   </div>
 </section>
 
+<style>
+  .icon-container {
+    width: 80px;
+    height: 80px;
+    z-index: 1;
+  }
+  
+  .rounded-circle:hover .position-absolute {
+    transform: scale(1.2);
+  }
+  
+  .transition-transform:hover {
+    transform: scale(1.05) !important;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .pulse-animation {
+    animation: pulse 2s infinite;
+  }
+  
+  @media (max-width: 767.98px) {
+    .icon-container {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .fa-md-3x {
+      font-size: 1.5em;
+    }
+    
+    .fs-md-4 {
+      font-size: 1.15rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .fa-md-3x {
+      font-size: 2.5em;
+    }
+    
+    .fs-md-4 {
+      font-size: 1.25rem;
+    }
+  }
+  
+  @media (max-width: 575.98px) {
+    .icon-container {
+      width: 50px;
+      height: 50px;
+    }
+  }
+</style>
+
 <!-- Plans Section -->
 <section class="mb-5" data-aos="fade-up" data-aos-delay="200">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="section-title">Тарифы для продвижения</h2>
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <h2 class="section-title mb-3 mb-md-0">Тарифы для продвижения</h2>
     <a href="{% url 'plan_list' %}" class="btn btn-outline-primary rounded-pill">
-      <i class="fas fa-tags me-2"></i>Все тарифы
+      <i class="fas fa-tags me-2"></i><span class="d-none d-sm-inline">Все тарифы</span><span class="d-inline d-sm-none">Все</span>
     </a>
   </div>
-  <div class="row g-4">
+  <div class="row g-3 g-md-4">
     {% if plans %}
       {% for plan in plans %}
-      <div class="col-lg-4">
-        <div class="card h-100 shadow-custom">
-          <div class="card-header text-center bg-primary text-white py-3">
-            <h4 class="mb-0">{{ plan.get_name_display }}</h4>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|mul:50 }}">
+        <div class="card h-100 plan-card shadow-sm border-0 {% if plan.name == 'top' %}border-primary{% endif %}">
+          <div class="card-header text-center {% if plan.name == 'top' %}bg-accent text-white{% elif plan.name == 'standard' %}bg-primary text-white{% else %}bg-light{% endif %} py-3 position-relative">
             {% if plan.name == 'top' %}
-            <div class="position-absolute end-0 top-0 translate-middle-y">
-              <span class="badge bg-warning py-2 px-3 rounded-pill">Популярный</span>
-            </div>
+              <div class="ribbon">Популярный</div>
             {% endif %}
+            <h4 class="mb-0">{{ plan.get_name_display }}</h4>
           </div>
-          <div class="card-body d-flex flex-column p-4">
-            <div class="text-center mb-4">
-              <h2 class="mb-0">{{ plan.amount }} <small class="text-muted">руб</small></h2>
+          <div class="card-body p-3 text-center d-flex flex-column">
+            <div class="price-tag mb-2 mt-1">
+              <span class="display-5 fw-bold">{{ plan.amount }}</span>
+              <span class="text-muted"> руб</span>
             </div>
-            <ul class="list-unstyled mb-4">
-              <li class="mb-3"><i class="fas fa-check text-success me-2"></i>Размещение объявления</li>
-              <li class="mb-3"><i class="fas fa-check text-success me-2"></i>Приоритет в списке: {{ plan.priority }}</li>
-              <li class="mb-3"><i class="fas fa-check text-success me-2"></i>Неограниченные сообщения</li>
+            
+            <div class="features-list bg-light rounded p-3 mb-3">
+              <div class="feature-item mb-2 d-flex align-items-center">
+                <i class="fas fa-star text-warning me-2"></i>
+                <span>Приоритет: <strong>{{ plan.priority }}</strong></span>
+              </div>
               {% if plan.name == 'top' %}
-              <li class="mb-3"><i class="fas fa-check text-success me-2"></i>Выделение цветом</li>
-              <li class="mb-3"><i class="fas fa-check text-success me-2"></i>Продвижение в соцсетях</li>
+              <div class="feature-item mb-2 d-flex align-items-center">
+                <i class="fas fa-paint-brush text-primary me-2"></i>
+                <span>Выделение цветом</span>
+              </div>
+              <div class="feature-item d-flex align-items-center">
+                <i class="fas fa-share-alt text-success me-2"></i>
+                <span>Продвижение</span>
+              </div>
+              {% elif plan.name == 'standard' %}
+              <div class="feature-item mb-2 d-flex align-items-center">
+                <i class="fas fa-search text-primary me-2"></i>
+                <span>Лучший поиск</span>
+              </div>
+              <div class="feature-item d-flex align-items-center">
+                <i class="fas fa-clock text-success me-2"></i>
+                <span>30 дней</span>
+              </div>
+              {% else %}
+              <div class="feature-item mb-2 d-flex align-items-center">
+                <i class="fas fa-check text-primary me-2"></i>
+                <span>Основа для старта</span>
+              </div>
+              <div class="feature-item d-flex align-items-center">
+                <i class="fas fa-clock text-success me-2"></i>
+                <span>30 дней</span>
+              </div>
               {% endif %}
-              {% if plan.name == 'standard' or plan.name == 'top' %}
-              <li class="mb-3"><i class="fas fa-check text-success me-2"></i>Больше фотографий</li>
-              {% endif %}
-            </ul>
-            <div class="mt-auto text-center">
-              <a href="{% url 'announcement_create' %}" class="btn btn-primary btn-lg w-100">
-                <i class="fas fa-check-circle me-2"></i>Выбрать
-              </a>
             </div>
+            
+            <a href="{% url 'plan_detail' plan.id %}" class="btn btn-sm {% if plan.name == 'top' %}btn-accent{% elif plan.name == 'standard' %}btn-primary{% else %}btn-outline-primary{% endif %} mt-auto">
+              Выбрать тариф
+            </a>
           </div>
         </div>
       </div>
       {% endfor %}
     {% else %}
-      <div class="col-12 text-center py-5 bg-light rounded-custom">
-        <p class="text-muted">Тарифы пока не добавлены</p>
+      <div class="col-12 text-center py-4 bg-light rounded-custom">
+        <i class="fas fa-tag fa-3x text-muted mb-3"></i>
+        <h4>Тарифы пока не добавлены</h4>
+        <p class="text-muted">Скоро здесь появятся тарифы для продвижения ваших объявлений</p>
       </div>
     {% endif %}
   </div>
 </section>
 
+<style>
+  .plan-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+  }
+  
+  .plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  }
+  
+  .ribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.25rem 1rem;
+    background-color: #FFC107;
+    color: #000;
+    font-weight: bold;
+    font-size: 0.8rem;
+    transform: rotate(45deg) translateX(30%) translateY(-50%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  
+  .feature-item {
+    text-align: left;
+    font-size: 0.9rem;
+  }
+</style>
+
 <!-- News Section -->
 <section class="mb-5" data-aos="fade-up" data-aos-delay="250">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="section-title">Новости и статьи</h2>
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <h2 class="section-title mb-3 mb-md-0">Последние новости</h2>
     <a href="{% url 'news_list' %}" class="btn btn-outline-primary rounded-pill">
-      <i class="fas fa-newspaper me-2"></i>Все новости
+      <i class="fas fa-newspaper me-2"></i><span class="d-none d-sm-inline">Все новости</span><span class="d-inline d-sm-none">Все</span>
     </a>
   </div>
-  <div class="row g-4">
+  <div class="row g-3 g-md-4">
     {% if news %}
       {% for news_item in news %}
-      <div class="col-lg-4 col-md-6">
-        <div class="card h-100 shadow-custom">
+      <div class="col-sm-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|mul:50 }}">
+        <div class="card h-100 shadow-custom border-0">
           {% if news_item.image %}
-          <img src="{{ news_item.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ news_item.title }}">
+            <img src="{{ news_item.image.url }}" class="card-img-top transition-transform" style="height: 180px; object-fit: cover;" alt="{{ news_item.title }}">
           {% else %}
-          <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-            <i class="fas fa-newspaper fa-3x text-muted"></i>
-          </div>
+            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+              <i class="fas fa-newspaper fa-3x text-muted"></i>
+            </div>
           {% endif %}
-          
-          <div class="card-body">
-            <div class="d-flex justify-content-between mb-2">
-              <small class="text-muted"><i class="far fa-calendar-alt me-1"></i>{{ news_item.created_at|date:"d.m.Y" }}</small>
-              <small class="badge bg-primary bg-opacity-10 text-primary">Новость</small>
+          <div class="card-body d-flex flex-column p-3">
+            <div class="d-flex justify-content-between text-muted small mb-2">
+              <span><i class="far fa-calendar-alt me-1"></i>{{ news_item.created_at|date:"d.m.Y" }}</span>
+              <span><i class="far fa-eye me-1"></i>{{ news_item.views }}</span>
             </div>
             <h5 class="card-title mb-3">{{ news_item.title }}</h5>
-            <p class="card-text text-muted">{{ news_item.content|truncatewords:20 }}</p>
-            <a href="#" class="btn btn-outline-primary mt-3">Читать далее</a>
+            <p class="card-text text-muted small mb-3">{{ news_item.content|truncatewords:25 }}</p>
+            <a href="{% url 'news_detail' news_item.id %}" class="btn btn-outline-primary btn-sm mt-auto align-self-start">
+              <i class="fas fa-angle-right me-1"></i>Читать далее
+            </a>
           </div>
         </div>
       </div>
       {% endfor %}
     {% else %}
-      <div class="col-12 text-center py-5 bg-light rounded-custom">
+      <div class="col-12 text-center py-4 bg-light rounded-custom">
         <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
         <h4>Новости пока не добавлены</h4>
-        <p class="text-muted">Скоро здесь появятся интересные статьи и новости</p>
+        <p class="text-muted">Скоро здесь появятся интересные новости и статьи</p>
       </div>
     {% endif %}
   </div>
 </section>
 
 <!-- Call to Action -->
-<section class="py-5 bg-primary text-white rounded-custom text-center mb-5" data-aos="fade-up" data-aos-delay="300">
+<section class="py-4 py-md-5 bg-primary text-white rounded-custom text-center mb-5" data-aos="fade-up" data-aos-delay="300">
   <div class="container">
     <h2 class="mb-3">Готовы присоединиться к сообществу?</h2>
     <p class="lead mb-4">Начните покупать и продавать экологичные товары уже сегодня!</p>
     <div class="d-flex justify-content-center gap-3 flex-wrap">
-      <a href="{% url 'register' %}" class="btn btn-light btn-lg px-5 btn-hero">
+      <a href="{% url 'register' %}" class="btn btn-light px-4 px-md-5 btn-hero">
         <i class="fas fa-user-plus me-2"></i>Регистрация
       </a>
-      <a href="{% url 'announcement_create' %}" class="btn btn-accent btn-lg px-5 btn-hero">
+      <a href="{% if user.is_authenticated %}{% url 'announcement_create' %}{% else %}{% url 'login' %}?next={% url 'announcement_create' %}{% endif %}" class="btn btn-accent px-4 px-md-5 btn-hero">
         <i class="fas fa-plus me-2"></i>Разместить объявление
       </a>
     </div>
   </div>
 </section>
 
-<!-- Section: News -->
-{% if news %}
-<section class="py-5 bg-light">
-  <div class="container">
-    <div class="row mb-4">
-      <div class="col-lg-6">
-        <h2 class="mb-1">Новости</h2>
-        <p class="lead text-muted">Последние события и новости нашего сообщества</p>
-      </div>
-      <div class="col-lg-6 d-flex justify-content-lg-end align-items-center">
-        <a href="{% url 'news_list' %}" class="btn btn-outline-primary">Все новости</a>
-      </div>
-    </div>
-
-    <div class="row">
-      {% for item in news %}
-      <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm hover-lift">
-          {% if item.image %}
-          <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.title }}">
-          {% endif %}
-          <div class="card-body">
-            <h5 class="card-title">{{ item.title }}</h5>
-            <p class="card-text text-muted">{{ item.content|truncatewords:20 }}</p>
-          </div>
-          <div class="card-footer bg-white">
-            <small class="text-muted">{{ item.created_at|date:"d.m.Y" }}</small>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-{% endif %}
-
-<!-- Section: Support Us -->
-<section class="py-5 bg-primary text-white">
+<!-- Support Us -->
+<section class="py-4 py-md-5 bg-light rounded-custom" data-aos="fade-up" data-aos-delay="350">
   <div class="container">
     <div class="row justify-content-between align-items-center">
-      <div class="col-lg-6 mb-4 mb-lg-0">
-        <h2 class="display-4 mb-3">Поддержите нашу миссию</h2>
+      <div class="col-lg-6 mb-4 mb-lg-0 text-center text-lg-start">
+        <h2 class="mb-3">Поддержите нашу миссию</h2>
         <p class="lead mb-4">Ваши пожертвования помогают нам создавать экологически чистую среду и поддерживать экологические проекты</p>
-        <div class="d-flex gap-3">
-          <a href="{% url 'donation' %}" class="btn btn-light btn-lg text-primary">
-            <i class="fas fa-heart text-danger me-2"></i>Сделать пожертвование
+        <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+          <a href="{% if user.is_authenticated %}{% url 'donation' %}{% else %}{% url 'login' %}?next={% url 'donation' %}{% endif %}" class="btn btn-primary" target="_blank">
+            <i class="fas fa-heart me-2"></i>Пожертвовать
           </a>
-          <a href="{% url 'donation_list' %}" class="btn btn-outline-light btn-lg">
-            <i class="fas fa-users me-2"></i>Наши благотворители
+          <a href="{% url 'donation_list' %}" class="btn btn-outline-primary">
+            <i class="fas fa-users me-2"></i>Благотворители
           </a>
         </div>
       </div>
-      <div class="col-lg-5">
-        <div class="card bg-white text-dark p-4 shadow">
+      <div class="col-lg-5 mt-4 mt-lg-0">
+        <div class="card bg-white text-dark p-3 p-md-4 shadow-sm">
           <div class="card-body">
-            <h3 class="mb-3">Как мы используем ваши пожертвования</h3>
-            <ul class="list-unstyled">
+            <h3 class="mb-3 fs-4 text-center text-lg-start">Как мы используем ваши пожертвования</h3>
+            <ul class="list-unstyled mb-0">
               <li class="d-flex align-items-center mb-3">
                 <div class="bg-success rounded-circle p-2 me-3 text-white">
                   <i class="fas fa-tree"></i>
@@ -390,7 +580,4 @@
     </div>
   </div>
 </section>
-
-<!-- Section: Call to Action -->
-<section class="py-5 bg-light"
 {% endblock content %}

@@ -4,6 +4,7 @@ from . import views
 
 from django.conf import settings
 from django.conf.urls.static import static
+from .views import *
 
 urlpatterns = [
     path('', views.index_view, name='index'),
@@ -15,6 +16,7 @@ urlpatterns = [
     path('banners/', views.banner_list_view, name='banner_list'),
     path('gallery/', views.gallery_list_view, name='gallery_list'),
     path('plans/', views.plan_list_view, name='plan_list'),
+    path('plans/<int:pk>/', views.plan_detail_view, name='plan_detail'),
     path('categories/', views.category_list_view, name='category_list'),
     path('categories/<int:pk>/', views.category_detail_view, name='category_detail'),
     path('categories-tree/', views.category_tree_view, name='category_tree'),
@@ -61,7 +63,18 @@ urlpatterns = [
     path('donation/success/', views.donation_success, name='donation_success'),
     path('donation/list/', views.donation_list, name='donation_list'),
     path('webhook/yookassa/', views.yookassa_webhook, name='yookassa_webhook'),
+    
+    # Admin views
+    path('approval/announcements/', views.admin_announcement_approval_view, name='admin_announcement_approval'),
+    
+    # Notifications
+    path('notifications/', views.user_notifications_view, name='notifications'),
+    path('fkko-autocomplete/', FkkoAutocomplete.as_view(), name='fkko-autocomplete'),
+    path('fkko-suggestions/', fkko_suggestions, name='fkko-suggestions'),
+
 ]
 
 if settings.DEBUG:  # Только для разработки
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+    

@@ -1,18 +1,19 @@
 {% extends "base.html" %}
 {% load static %}
 {% load custom_filters %}
-{% block title %}Создать объявление - Чистый Мир{% endblock title %}
+{% block title %}{% if form.instance.id %}Редактировать объявление{% else %}Создать объявление{% endif %} - Чистый Мир{% endblock title %}
 
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-lg-8">
-      <h1 class="mb-4">Создать объявление</h1>
+      <h1 class="mb-4">{% if form.instance.id %}Редактировать объявление{% else %}Создать объявление{% endif %}</h1>
       
       <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-body p-4">
           <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
             {% csrf_token %}
+            {{ form.media }}
             
             {% if form.errors %}
             <div class="alert alert-danger">
@@ -28,7 +29,8 @@
               </label>
               <input type="text" name="title" id="id_title" 
                      class="form-control form-control-lg" 
-                     placeholder="Например: Переработка пластиковых бутылок" required>
+                     placeholder="Например: Переработка пластиковых бутылок"
+                     value="{{ form.instance.title|default:'' }}" required>
               <div class="invalid-feedback">
                 Пожалуйста, введите заголовок объявления.
               </div>
@@ -36,19 +38,21 @@
             
             <div class="mb-4">
               <label for="id_category" class="form-label fw-bold">
-                <i class="fas fa-tag me-2"></i>Категория
+                <i class="fas fa-folder me-2"></i>Категория <span class="text-danger">*</span>
               </label>
               <select name="category" id="id_category" 
-                     class="form-select form-select-lg" required>
+                      class="form-select" required>
                 <option value="">Выберите категорию</option>
                 {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
+                <option value="{{ category.id }}" {% if form.instance.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
                 {% endfor %}
               </select>
               <div class="invalid-feedback">
                 Пожалуйста, выберите категорию.
               </div>
             </div>
+            
+
             
             <div class="mb-4">
               <label for="id_description" class="form-label fw-bold">
@@ -57,7 +61,7 @@
               <textarea name="description" id="id_description" 
                         class="form-control" 
                         placeholder="Подробное описание вашего объявления" 
-                        style="min-height: 150px;" required></textarea>
+                        style="min-height: 150px;" required>{{ form.instance.description|default:'' }}</textarea>
               <div class="invalid-feedback">
                 Пожалуйста, введите описание.
               </div>
@@ -66,14 +70,87 @@
             
             <div class="mb-4">
               <label for="id_price" class="form-label fw-bold">
-                <i class="fas fa-money-bill-wave me-2"></i>Цена (руб)
+                <i class="fas fa-ruble-sign me-2"></i>Цена <span class="text-danger">*</span>
               </label>
-              <input type="number" name="price" id="id_price" 
-                     class="form-control form-control-lg" 
-                     placeholder="Цена в рублях" required>
+              <div class="input-group">
+                <input type="number" name="price" id="id_price" 
+                       class="form-control" min="0" step="0.01" 
+                       placeholder="Укажите цену" required
+                       value="{{ form.instance.price|default:0 }}">
+                <span class="input-group-text">руб.</span>
+              </div>
               <div class="invalid-feedback">
                 Пожалуйста, укажите цену.
               </div>
+            </div>
+
+{#            <div class="mb-4">#}
+{#  <label for="id_fkko_code" class="form-label fw-bold">#}
+{#    <i class="fas fa-barcode me-2"></i>Код ФККО#}
+{#  </label>#}
+{#  <input#}
+{#    type="text"#}
+{#    name="fkko_code"#}
+{#    id="id_fkko_code"#}
+{#    class="form-control"#}
+{#    placeholder="Например: 1345"#}
+{#    value="{{ form.instance.fkko_code|default:'' }}"#}
+{#  >#}
+{#  <div class="form-text">#}
+{#    Добавьте код ФККО для классификации отходов (необязательно).<br>#}
+{##}
+{#    <a href="https://rpn.gov.ru/fkko/" target="_blank" rel="noopener">#}
+{#      Узнать код#}
+{#    </a>#}
+{#  </div>#}
+{#</div>#}
+
+           <div class="mb-4 position-relative">
+  <label class="form-label fw-bold">
+    <i class="fas fa-barcode me-2"></i>Коды ФККО
+  </label>
+
+  <!-- Контейнер для чипов -->
+  <div id="fkko_selected" class="mb-2 d-flex flex-wrap gap-2"></div>
+
+  <!-- Поле ввода -->
+  <input
+    type="text"
+    id="fkko_input"
+    class="form-control"
+    placeholder="Начните вводить код или название…"
+    autocomplete="off"
+  >
+
+  <!-- Скрытое поле -->
+  <input type="hidden" name="fkko_code" id="fkko_code_hidden"
+         value="{{ form.instance.fkko_code|default:'' }}">
+
+  <!-- Выпадающий список -->
+  <ul id="fkko_list" class="list-group position-absolute w-100"
+      style="z-index:1000; display:none; max-height:250px; overflow-y:auto;">
+    {% if results %}
+      {% for item in results %}
+        <li class="list-group-item list-group-item-action"
+            data-code="{{ item.code }}" data-name="{{ item.name }}">
+          <strong>{{ item.code }}</strong>: {{ item.name }}
+        </li>
+      {% endfor %}
+    {% elif query %}
+      <li class="list-group-item text-muted">Ничего не найдено</li>
+    {% endif %}
+  </ul>
+</div>
+
+            
+            <div class="mb-4">
+              <label for="id_condition" class="form-label fw-bold">
+                <i class="fas fa-info-circle me-2"></i>Состояние
+              </label>
+              <input type="text" name="condition" id="id_condition" 
+                     class="form-control" 
+                     placeholder="Например: Новое, Б/У, Отличное и т.д."
+                     value="{{ form.instance.condition|default:'' }}">
             </div>
             
             <div class="mb-4">
@@ -83,7 +160,7 @@
               <select name="plan" id="id_plan" class="form-select">
                 <option value="">Выберите тарифный план (необязательно)</option>
                 {% for plan in plans %}
-                <option value="{{ plan.id }}">{{ plan.name }} - {{ plan.amount }} руб.</option>
+                <option value="{{ plan.id }}" {% if form.instance.plan_id == plan.id %}selected{% endif %}>{{ plan.name }} - {{ plan.amount }} руб.</option>
                 {% endfor %}
               </select>
               <div class="form-text">
@@ -98,7 +175,18 @@
               </label>
               <input type="text" name="location" id="id_location" 
                      class="form-control" 
-                     placeholder="Например: Москва, ул. Ленина">
+                     placeholder="Например: Москва, ул. Ленина"
+                     value="{{ form.instance.location|default:'' }}">
+            </div>
+            
+            <div class="mb-4">
+              <label for="id_city" class="form-label fw-bold">
+                <i class="fas fa-city me-2"></i>Город
+              </label>
+              <input type="text" name="city" id="id_city" 
+                     class="form-control" 
+                     placeholder="Например: Москва"
+                     value="{{ form.instance.city|default:'' }}">
             </div>
             
             <div class="mb-4">
@@ -107,14 +195,15 @@
               </label>
               <input type="tel" name="phone" id="id_phone" 
                      class="form-control" 
-                     placeholder="+7 (XXX) XXX-XX-XX" required>
+                     placeholder="+7 (XXX) XXX-XX-XX"
+                     value="{{ form.instance.phone|default:'' }}" required>
               <div class="invalid-feedback">
                 Пожалуйста, укажите контактный телефон.
               </div>
             </div>
             
             <!-- Скрытые поля -->
-            <input type="hidden" name="status" value="draft">
+            <input type="hidden" name="status" value="{% if form.instance.status %}{{ form.instance.status }}{% else %}pending{% endif %}">
             
             <div class="mb-4">
               <label class="form-label fw-bold">
@@ -133,8 +222,9 @@
             </div>
             
             <div class="d-grid gap-2">
-              <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-paper-plane me-2"></i>Опубликовать объявление
+              <button type="submit" id="submitButton" class="btn btn-primary btn-lg w-100">
+                <i class="fas fa-check-circle me-2"></i>{% if form.instance.id %}Сохранить изменения{% else %}Опубликовать объявление{% endif %}
+                <span id="spinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
               </button>
               <a href="{% url 'announcement_list' %}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-2"></i>Вернуться к списку объявлений
@@ -208,5 +298,158 @@
     console.log('Submitting form...');
     // Не останавливаем отправку формы, просто логируем
   });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Предотвращение многократной отправки формы
+    const form = document.querySelector('form');
+    const submitButton = document.getElementById('submitButton');
+    const spinner = document.getElementById('spinner');
+    
+    form.addEventListener('submit', function(e) {
+      // Проверяем, что форма ещё не была отправлена
+      if (submitButton.disabled) {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Отключаем кнопку и показываем индикатор загрузки
+      submitButton.disabled = true;
+      submitButton.classList.add('opacity-75');
+      spinner.classList.remove('d-none');
+      
+      // На всякий случай добавляем таймаут для разблокировки кнопки через 30 секунд,
+      // если что-то пойдет не так с отправкой формы
+      setTimeout(function() {
+        submitButton.disabled = false;
+        submitButton.classList.remove('opacity-75');
+        spinner.classList.add('d-none');
+      }, 30000);
+      
+      return true;
+    });
+    
+    // Предзагрузка изображений для быстрого отображения
+    const imageInputs = document.querySelectorAll('input[type="file"]');
+    imageInputs.forEach(input => {
+      input.addEventListener('change', function() {
+        // Здесь можно добавить предпросмотр изображений, если нужно
+      });
+    });
+  });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const inp      = document.getElementById('fkko_input');
+  const hidden   = document.getElementById('fkko_code_hidden');
+  const list     = document.getElementById('fkko_list');
+  const selected = document.getElementById('fkko_selected');
+  let   timer    = null;
+  let   codes    = [];
+  let   lastQ    = '';  // последний использованный поисковый запрос
+
+  // Стоп-слова, которые не пойдут в запрос
+  const stopwords = [
+    'продаю','продам','куплю','арендую','снимаю',
+    'ищу','предлагаю','отдам','продаём','продается',
+    'продаётся','продают'
+  ];
+
+  // Если уже есть сохранённые коды — отрисуем их чипами
+  if (hidden.value) {
+    codes = hidden.value.split(',')
+                        .map(s=>s.trim())
+                        .filter(Boolean);
+    renderChips();
+  }
+
+  // При вводе — дебаунсим и запускаем fetchSuggestions
+  inp.addEventListener('input', function(){
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const tokens = inp.value
+        .trim()
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(w => w && !stopwords.includes(w));
+      const q = tokens.join(' ');
+      if (q.length < 2) {
+        list.style.display = 'none';
+        return;
+      }
+      lastQ = q;
+      fetchSuggestions(q);
+    }, 300);
+  });
+
+  // Делает AJAX, рисует только те подсказки, чьи коды ещё не выбраны
+  function fetchSuggestions(q) {
+    fetch("{% url 'fkko-suggestions' %}?q=" + encodeURIComponent(q))
+      .then(r => r.json())
+      .then(data => {
+        list.innerHTML = '';
+        data.forEach(item => {
+          if (!codes.includes(item.code)) {
+            const li = document.createElement('li');
+            li.className = 'list-group-item list-group-item-action';
+            li.textContent = `${item.code} — ${item.name}`;
+            li.dataset.code = item.code;
+            list.appendChild(li);
+          }
+        });
+        list.style.display = list.children.length ? 'block' : 'none';
+      })
+      .catch(console.error);
+  }
+
+  // При клике на подсказку — добавляем чип, обновляем скрытое поле
+  // и **снова** запрашиваем suggestions с тем же lastQ
+  list.addEventListener('click', function(e){
+    const li = e.target.closest('li');
+    if (!li) return;
+    const code = li.dataset.code;
+    if (!codes.includes(code)) {
+      codes.push(code);
+      updateHidden();
+      renderChips();
+    }
+    fetchSuggestions(lastQ);
+  });
+
+  // Рендерим чипы выбранных кодов
+  function renderChips() {
+    selected.innerHTML = '';
+    codes.forEach(code => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.textContent = code;
+      const rm = document.createElement('span');
+      rm.className = 'remove';
+      rm.textContent = '×';
+      rm.onclick = () => {
+        codes = codes.filter(c => c !== code);
+        updateHidden();
+        renderChips();
+        // после удаления чипа можно тоже перезапросить
+        if (lastQ.length >= 2) fetchSuggestions(lastQ);
+      };
+      chip.appendChild(rm);
+      selected.appendChild(chip);
+    });
+  }
+
+  // Обновляем значение скрытого поля
+  function updateHidden() {
+    hidden.value = codes.join(',');
+  }
+
+  // Скрываем список, если клик вне поля/списка
+  document.addEventListener('click', function(e){
+    if (!inp.contains(e.target) && !list.contains(e.target)) {
+      list.style.display = 'none';
+    }
+  });
+});
+</script>
+
+
 {% endblock content %}

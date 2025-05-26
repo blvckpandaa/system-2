@@ -1,47 +1,174 @@
 {% extends "base.html" %}
 {% load static %}
 {% load custom_filters %}
-{% block title %}Категория {{ cat.name }} - Чистый Мир{% endblock title %}
+
+{% block title %}{{ category.name }} - Чистый Мир{% endblock title %}
 
 {% block content %}
-<div class="container mt-4">
-  <div class="card shadow-sm p-4">
-    <h3 class="mb-3">{{ cat.name }}</h3>
-    {% if cat.image %}
-      <!-- Сжимаем и обрезаем, чтобы не было гигантского изображения -->
-      <img src="{{ cat.image.url }}" alt="{{ cat.name }}"
-           class="img-fluid mb-3 rounded"
-           style="max-height: 300px; object-fit: cover;">
-    {% endif %}
-    <hr>
-    <h5 class="mb-3">Объявления:</h5>
+<div class="container py-4">
+  <!-- Хлебные крошки -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'category_list' %}">Категории</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+    </ol>
+  </nav>
+
+  <!-- Заголовок категории -->
+  <div class="category-header bg-light p-3 p-md-4 rounded-custom mb-4 shadow-sm">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="category-title mb-2">{{ category.name }}</h1>
+        <p class="text-muted mb-0">Найдено объявлений: <span class="badge bg-primary">{{ ann_list|length }}</span></p>
+      </div>
+      <div class="col-md-4 mt-3 mt-md-0 text-md-end">
+        <a href="{% url 'category_list' %}" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-th-list me-2"></i>Все категории
+        </a>
+        <a href="{% url 'category_tree' %}" class="btn btn-outline-secondary btn-sm ms-2">
+          <i class="fas fa-sitemap me-2"></i>Дерево категорий
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Изображение категории -->
+  {% if category.image %}
+  <div class="text-center mb-4">
+    <img src="{{ category.image.url }}" alt="{{ category.name }}" class="img-fluid rounded-custom" style="max-height: 300px; object-fit: cover;">
+  </div>
+  {% endif %}
+  
+  <!-- Карточки объявлений -->
+  <div class="row g-3 g-md-4">
     {% if ann_list %}
-      <!-- Сетка карточек объявлений -->
-      <div class="row row-cols-1 row-cols-md-3 g-4">
-        {% for a in ann_list %}
-        <div class="col">
-          <div class="card h-100 shadow-sm">
-            {% if a.images.first %}
-              <img src="{{ a.images.first.image.url }}" class="card-img-top" alt="{{ a.title }}"
-                   style="max-height: 200px; object-fit: cover;">
+      {% for ann in ann_list %}
+      <div class="col-12 col-sm-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter|mul:50 }}">
+        <div class="card h-100 announcement-card shadow-custom border-0">
+          <div class="position-relative overflow-hidden">
+            {% if ann.images.all %}
+              <img src="{{ ann.images.first.image.url }}" class="card-img-top transition-transform" style="height: 180px; object-fit: cover;" alt="{{ ann.title }}">
             {% else %}
-              <img src="{% static 'no_image.png' %}" class="card-img-top"
-                   style="max-height: 200px; object-fit: cover;"
-                   alt="Нет изображения">
+              <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                <i class="fas fa-image fa-3x text-muted"></i>
+              </div>
             {% endif %}
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">{{ a.title }}</h5>
-              <p class="card-text text-muted flex-grow-1">{{ a.description|truncatechars:80 }}</p>
-              <h6 class="text-success">{{ a.price }} руб.</h6>
-              <a href="{% url 'announcement_detail' a.id %}" class="btn btn-outline-primary btn-sm mt-2">Подробнее</a>
+            
+            <span class="position-absolute top-0 end-0 badge bg-accent m-3 py-2 px-3 rounded-pill">
+              {{ ann.price }} руб
+            </span>
+          </div>
+          
+          <div class="card-body d-flex flex-column p-3">
+            <div class="mb-2">
+              {% if ann.category %}
+                <span class="badge bg-light text-primary border border-primary-subtle px-2 py-1 rounded-pill">{{ ann.category.name }}</span>
+              {% endif %}
+            </div>
+            <h5 class="card-title mb-2">{{ ann.title }}</h5>
+            <p class="card-text text-muted mb-3 small">{{ ann.description|truncatewords:15 }}</p>
+            
+            <div class="mt-auto">
+              <div class="d-flex justify-content-between text-muted small mb-3">
+                <div class="text-truncate me-2"><i class="fas fa-map-marker-alt me-1"></i>{{ ann.location|default:"Не указано" }}</div>
+                <div><i class="far fa-calendar-alt me-1"></i>{{ ann.created_at|date:"d.m.Y" }}</div>
+              </div>
+              
+              <div class="d-flex justify-content-between">
+                <a href="{% url 'announcement_detail' ann.id %}" class="btn btn-primary btn-sm px-3">
+                  <i class="fas fa-info-circle me-1"></i><span class="d-none d-sm-inline">Подробнее</span><span class="d-inline d-sm-none">Открыть</span>
+                </a>
+                {% if user.is_authenticated %}
+                <form action="{% url 'favorite_add' %}" method="POST">
+                  {% csrf_token %}
+                  <input type="hidden" name="announcement" value="{{ ann.id }}">
+                  <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="far fa-heart"></i>
+                  </button>
+                </form>
+                {% endif %}
+              </div>
             </div>
           </div>
         </div>
-        {% endfor %}
       </div>
+      {% endfor %}
     {% else %}
-      <p class="text-muted">Объявлений пока нет.</p>
+      <div class="col-12 text-center py-5 bg-light rounded-custom">
+        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+        <h4>Объявления в категории "{{ category.name }}" пока не добавлены</h4>
+        <p class="text-muted">Будьте первым, кто разместит объявление в этой категории!</p>
+        <a href="{% url 'announcement_create' %}?category={{ category.id }}" class="btn btn-primary mt-3">
+          <i class="fas fa-plus me-2"></i>Разместить объявление
+        </a>
+      </div>
     {% endif %}
   </div>
 </div>
+
+<style>
+  /* Заголовок категории */
+  .category-header {
+    border-left: 5px solid var(--bs-primary);
+  }
+  
+  .category-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--bs-dark);
+  }
+  
+  /* Карточки объявлений */
+  .announcement-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .announcement-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .card-img-top.transition-transform:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 1199.98px) {
+    .category-title {
+      font-size: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 991.98px) {
+    .category-title {
+      font-size: 1.4rem;
+    }
+  }
+  
+  @media (max-width: 767.98px) {
+    .category-title {
+      font-size: 1.3rem;
+    }
+    
+    .category-header {
+      padding: 1rem !important;
+    }
+  }
+  
+  @media (max-width: 575.98px) {
+    .category-title {
+      font-size: 1.25rem;
+    }
+    
+    .breadcrumb {
+      font-size: 0.875rem;
+    }
+    
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+  }
+</style>
 {% endblock content %}

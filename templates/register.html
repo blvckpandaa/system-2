@@ -6,46 +6,152 @@
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
-    <div class="col-lg-5 col-md-8">
-      <div class="card shadow-lg border-0 rounded-4 p-4">
-        <h3 class="mb-4 text-center text-primary">Регистрация</h3>
-        <form method="POST">
+    <div class="col-lg-6 col-md-8">
+      <div class="card shadow-lg border-0 rounded-custom p-4 p-md-5 position-relative overflow-hidden" data-aos="fade-up">
+        <div class="position-absolute bg-primary opacity-10 rounded-circle" style="width: 300px; height: 300px; top: -120px; right: -120px;"></div>
+        <div class="position-absolute bg-accent opacity-10 rounded-circle" style="width: 200px; height: 200px; bottom: -80px; left: -100px;"></div>
+        
+        <div class="text-center mb-4">
+          <i class="fas fa-leaf fa-3x text-primary mb-3" style="transform: rotate(-15deg);"></i>
+          <h2 class="fw-bold">Добро пожаловать!</h2>
+          <p class="text-muted">Создайте аккаунт и начните делать мир чище</p>
+        </div>
+        
+        <form method="POST" class="position-relative">
           {% csrf_token %}
+          {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+          {% endif %}
           {{ form.non_field_errors }}
 
-          <div class="mb-3">
-            <label for="id_username" class="form-label">Имя пользователя</label>
-            <input type="text" name="username" class="form-control rounded-pill" id="id_username" value="{{ form.username.value }}">
-            <div class="text-danger small">{{ form.username.errors }}</div>
+          <div class="mb-4">
+            <label for="id_username" class="form-label fw-medium">Имя пользователя</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0">
+                <i class="fas fa-user text-primary"></i>
+              </span>
+              <input type="text" name="username" class="form-control border-start-0 ps-0" id="id_username" value="{{ form.username.value }}" placeholder="Введите имя пользователя">
+            </div>
+            {% if form.username.errors %}
+            <div class="text-danger small mt-2">
+              <i class="fas fa-exclamation-circle me-1"></i>{{ form.username.errors }}
+            </div>
+            {% endif %}
           </div>
 
-          <div class="mb-3">
-            <label for="id_email" class="form-label">Email</label>
-            <input type="email" name="email" class="form-control rounded-pill" id="id_email" value="{{ form.email.value }}">
-            <div class="text-danger small">{{ form.email.errors }}</div>
+          <div class="mb-4">
+            <label for="id_email" class="form-label fw-medium">Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0">
+                <i class="fas fa-envelope text-primary"></i>
+              </span>
+              <input type="email" name="email" class="form-control border-start-0 ps-0" id="id_email" value="{{ form.email.value }}" placeholder="example@email.com">
+            </div>
+            {% if form.email.errors %}
+            <div class="text-danger small mt-2">
+              <i class="fas fa-exclamation-circle me-1"></i>{{ form.email.errors }}
+            </div>
+            {% endif %}
           </div>
 
-          <div class="mb-3">
-            <label for="id_password1" class="form-label">Пароль</label>
-            <input type="password" name="password1" class="form-control rounded-pill" id="id_password1">
-            <div class="text-danger small">{{ form.password1.errors }}</div>
+          <div class="mb-4">
+            <label for="id_password1" class="form-label fw-medium">Пароль</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0">
+                <i class="fas fa-lock text-primary"></i>
+              </span>
+              <input type="password" name="password1" class="form-control border-start-0 ps-0" id="id_password1" placeholder="Минимум 8 символов">
+              <button type="button" class="btn btn-light border" id="togglePassword1">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            {% if form.password1.errors %}
+            <div class="text-danger small mt-2">
+              <i class="fas fa-exclamation-circle me-1"></i>{{ form.password1.errors }}
+            </div>
+            {% else %}
+            <div class="form-text small mt-2">
+              <i class="fas fa-info-circle me-1"></i>Пароль должен содержать минимум 8 символов и не должен быть слишком простым
+            </div>
+            {% endif %}
           </div>
 
-          <div class="mb-3">
-            <label for="id_password2" class="form-label">Повторите пароль</label>
-            <input type="password" name="password2" class="form-control rounded-pill" id="id_password2">
-            <div class="text-danger small">{{ form.password2.errors }}</div>
+          <div class="mb-4">
+            <label for="id_password2" class="form-label fw-medium">Повторите пароль</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0">
+                <i class="fas fa-lock text-primary"></i>
+              </span>
+              <input type="password" name="password2" class="form-control border-start-0 ps-0" id="id_password2" placeholder="Повторите пароль">
+              <button type="button" class="btn btn-light border" id="togglePassword2">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            {% if form.password2.errors %}
+            <div class="text-danger small mt-2">
+              <i class="fas fa-exclamation-circle me-1"></i>{{ form.password2.errors }}
+            </div>
+            {% endif %}
           </div>
 
-          <button class="btn btn-primary w-100 rounded-pill mt-3">Зарегистрироваться</button>
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+            <label class="form-check-label small" for="agreeTerms">
+              Я согласен с <a href="#" class="text-primary">условиями использования</a> и <a href="#" class="text-primary">политикой конфиденциальности</a>
+            </label>
+          </div>
+
+          <button class="btn btn-primary w-100 py-3 position-relative overflow-hidden" type="submit">
+            <span class="position-relative d-block">
+              <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+            </span>
+            <span class="position-absolute top-0 start-0 bg-white opacity-25 w-100 h-100 translate-middle-y" style="transform: translateY(-100%); transition: transform 0.3s ease;"></span>
+          </button>
         </form>
 
-        <p class="mt-4 text-center">
-          Уже есть аккаунт?
-          <a href="{% url 'login' %}" class="text-primary fw-bold">Войти</a>
-        </p>
+        <div class="text-center mt-4">
+          <p class="mb-0">
+            Уже есть аккаунт?
+            <a href="{% url 'login' %}" class="text-primary fw-bold text-decoration-none">Войти</a>
+          </p>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Показать/скрыть пароль
+    const togglePassword1 = document.getElementById('togglePassword1');
+    const password1 = document.getElementById('id_password1');
+    
+    togglePassword1.addEventListener('click', function() {
+      const type = password1.getAttribute('type') === 'password' ? 'text' : 'password';
+      password1.setAttribute('type', type);
+      this.querySelector('i').classList.toggle('fa-eye');
+      this.querySelector('i').classList.toggle('fa-eye-slash');
+    });
+    
+    const togglePassword2 = document.getElementById('togglePassword2');
+    const password2 = document.getElementById('id_password2');
+    
+    togglePassword2.addEventListener('click', function() {
+      const type = password2.getAttribute('type') === 'password' ? 'text' : 'password';
+      password2.setAttribute('type', type);
+      this.querySelector('i').classList.toggle('fa-eye');
+      this.querySelector('i').classList.toggle('fa-eye-slash');
+    });
+    
+    // Эффект при наведении на кнопку
+    const submitButton = document.querySelector('button[type="submit"]');
+    submitButton.addEventListener('mouseenter', function() {
+      this.querySelector('.position-absolute').style.transform = 'translateY(0)';
+    });
+    
+    submitButton.addEventListener('mouseleave', function() {
+      this.querySelector('.position-absolute').style.transform = 'translateY(-100%)';
+    });
+  });
+</script>
 {% endblock content %}

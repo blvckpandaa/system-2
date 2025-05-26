@@ -2,37 +2,521 @@
 {% load static %}
 {% load custom_filters %}
 {% block title %}Результаты поиска - Чистый Мир{% endblock title %}
+
 {% block content %}
-<div class="container mt-4">
-  <h2 class="section-title">Qidiruv natijalari</h2>
-  <form method="GET" class="mb-4">
-    <input type="text" name="q" class="form-control" placeholder="Qidirish..." value="{{ query }}">
-  </form>
+<div class="container py-4">
+  <div class="row">
+    <div class="col-lg-12 mb-4">
+      <div class="card border-0 shadow-sm rounded-custom">
+        <div class="card-body p-4">
+          <h1 class="h3 mb-4">Поиск по сайту</h1>
 
-  <div class="mb-3">
-    <h5>E'lonlar:</h5>
-    {% if announcements %}
-    <ul>
-      {% for a in announcements %}
-      <li><a href="{% url 'announcement_detail' a.id %}">{{ a.title }}</a></li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="text-muted">E'lon topilmadi</p>
-    {% endif %}
-  </div>
+          <form method="GET" action="{% url 'global_search' %}" class="search-form mb-4">
+            <div class="input-group input-group-lg mb-3">
+              <span class="input-group-text bg-white border-end-0">
+                <i class="fas fa-search text-primary"></i>
+              </span>
+              <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Введите запрос для поиска..." value="{{ query }}" required>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i>Найти
+              </button>
+            </div>
 
-  <div class="mb-3">
-    <h5>Kategoriyalar:</h5>
-    {% if categories %}
-    <ul>
-      {% for c in categories %}
-      <li><a href="{% url 'category_detail' c.id %}">{{ c.name }}</a></li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="text-muted">Kategoriya topilmadi</p>
-    {% endif %}
+            <!-- Фильтры поиска -->
+            <div class="collapse {% if query %}show{% endif %}" id="searchFilters">
+              <div class="card card-body mb-3 border-0 bg-light">
+                <div class="row g-3">
+                  <!-- Тип поиска -->
+                  <div class="col-md-3">
+                    <label class="form-label fw-medium">Искать в разделе:</label>
+                    <select name="type" class="form-select">
+                      <option value="all" {% if search_type == 'all' %}selected{% endif %}>Все разделы</option>
+                      <option value="announcements" {% if search_type == 'announcements' %}selected{% endif %}>Объявления</option>
+                      <option value="categories" {% if search_type == 'categories' %}selected{% endif %}>Категории</option>
+                      <option value="news" {% if search_type == 'news' %}selected{% endif %}>Новости</option>
+                      <option value="users" {% if search_type == 'users' %}selected{% endif %}>Пользователи</option>
+                    </select>
+                  </div>
+
+                  <!-- Фильтр по категории -->
+                  <div class="col-md-3">
+                    <label class="form-label fw-medium">Категория:</label>
+                    <select name="category" class="form-select">
+                      <option value="">Все категории</option>
+                      {% for cat in all_categories %}
+                      <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:'s' %}selected{% endif %}>
+                        {% if cat.level > 0 %}
+                        {% for i in cat.level|range_num %}—{% endfor %}
+                        {% endif %}
+                        {{ cat.name }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+
+                  <!-- Фильтр по городу -->
+                  <div class="col-md-3">
+                    <label class="form-label fw-medium">Город:</label>
+                    <select name="city" class="form-select">
+                      <option value="">Все города</option>
+                      {% for city in cities %}
+                      <option value="{{ city }}" {% if city_filter == city %}selected{% endif %}>{{ city }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+
+                  <!-- Сортировка -->
+                  <div class="col-md-3">
+                    <label class="form-label fw-medium">Сортировка:</label>
+                    <select name="sort" class="form-select">
+                      <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Сначала новые</option>
+                      <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Сначала старые</option>
+                      <option value="-price" {% if sort_by == '-price' %}selected{% endif %}>По убыванию цены</option>
+                      <option value="price" {% if sort_by == 'price' %}selected{% endif %}>По возрастанию цены</option>
+                      <option value="title" {% if sort_by == 'title' %}selected{% endif %}>По названию (А-Я)</option>
+                      <option value="-title" {% if sort_by == '-title' %}selected{% endif %}>По названию (Я-А)</option>
+                    </select>
+                  </div>
+
+                  <!-- Фильтр по цене -->
+                  <div class="col-md-6">
+                    <label class="form-label fw-medium">Цена (руб):</label>
+                    <div class="row g-2">
+                      <div class="col">
+                        <div class="input-group">
+                          <span class="input-group-text">от</span>
+                          <input type="number" name="price_min" class="form-control" placeholder="Мин. цена" value="{{ price_min }}">
+                        </div>
+                      </div>
+                      <div class="col">
+                        <div class="input-group">
+                          <span class="input-group-text">до</span>
+                          <input type="number" name="price_max" class="form-control" placeholder="Макс. цена" value="{{ price_max }}">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 d-flex align-items-end">
+                    <div class="d-flex gap-2">
+                      <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter me-2"></i>Применить фильтры
+                      </button>
+                      <a href="{% url 'global_search' %}?q={{ query }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo me-2"></i>Сбросить
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Кнопка переключения фильтров -->
+            <button class="btn btn-sm btn-outline-primary mb-4" type="button" data-bs-toggle="collapse" data-bs-target="#searchFilters">
+              <i class="fas fa-sliders-h me-2"></i>Расширенный поиск
+            </button>
+          </form>
+
+          <!-- Если есть запрос, показываем результаты -->
+          {% if query %}
+          <div class="search-results">
+            <h2 class="h5 mb-3">Результаты поиска для "{{ query }}"</h2>
+
+            <!-- Навигация по вкладкам результатов -->
+            <ul class="nav nav-tabs mb-4" id="searchResultTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="announcements-tab" data-bs-toggle="tab" data-bs-target="#announcements-tab-pane" type="button" role="tab">
+                  <i class="fas fa-bullhorn me-2"></i>Объявления
+                  <span class="badge bg-primary ms-2">{{ announcements.paginator.count }}</span>
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories-tab-pane" type="button" role="tab">
+                  <i class="fas fa-layer-group me-2"></i>Категории
+                  <span class="badge bg-primary ms-2">{{ categories.count }}</span>
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="news-tab" data-bs-toggle="tab" data-bs-target="#news-tab-pane" type="button" role="tab">
+                  <i class="fas fa-newspaper me-2"></i>Новости
+                  <span class="badge bg-primary ms-2">{{ news.count }}</span>
+                </button>
+              </li>
+              {% if user.is_authenticated %}
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-tab-pane" type="button" role="tab">
+                  <i class="fas fa-users me-2"></i>Пользователи
+                  <span class="badge bg-primary ms-2">{{ users.count }}</span>
+                </button>
+              </li>
+              {% endif %}
+            </ul>
+
+            <!-- Содержимое вкладок с результатами -->
+            <div class="tab-content" id="searchResultTabsContent">
+              <!-- Объявления -->
+              <div class="tab-pane fade show active" id="announcements-tab-pane" role="tabpanel" tabindex="0">
+                {% if announcements %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                  {% for announcement in announcements %}
+                  <div class="col">
+                    <div class="card h-100 shadow-sm hover-lift border-0 rounded-custom">
+                      <div class="position-relative">
+                        {% if announcement.images.first %}
+                        <img src="{{ announcement.images.first.image.url }}" class="card-img-top rounded-top-custom" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light rounded-top-custom d-flex align-items-center justify-content-center" style="height: 200px;">
+                          <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        {% if announcement.price > 0 %}
+                        <div class="position-absolute bottom-0 end-0 m-3">
+                          <span class="badge bg-primary p-2 rounded-custom">{{ announcement.price }} ₽</span>
+                        </div>
+                        {% endif %}
+                      </div>
+                      <div class="card-body">
+                        <h5 class="card-title text-truncate fw-bold">{{ announcement.title }}</h5>
+                        <p class="card-text text-muted small mb-2">
+                          {% if announcement.category %}
+                          <i class="fas fa-folder me-1"></i> {{ announcement.category.name }}
+                          {% endif %}
+                        </p>
+                        <p class="card-text mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                          {{ announcement.description|truncatewords:15 }}
+                        </p>
+                      </div>
+                      <div class="card-footer bg-white border-top-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <small class="text-muted">
+                            <i class="far fa-clock me-1"></i> {{ announcement.created_at|date:"d.m.Y" }}
+                          </small>
+                          <a href="{% url 'announcement_detail' announcement.id %}" class="btn btn-sm btn-outline-primary">Подробнее</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+
+                <!-- Пагинация -->
+                {% if announcements.paginator.num_pages > 1 %}
+                <div class="d-flex justify-content-center mt-4">
+                  <nav aria-label="Pagination">
+                    <ul class="pagination">
+                      {% if announcements.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&page=1{% if category_filter %}&category={{ category_filter }}{% endif %}{% if city_filter %}&city={{ city_filter }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if search_type %}&type={{ search_type }}{% endif %}">
+                          <i class="fas fa-angle-double-left"></i>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&page={{ announcements.previous_page_number }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if city_filter %}&city={{ city_filter }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if search_type %}&type={{ search_type }}{% endif %}">
+                          <i class="fas fa-angle-left"></i>
+                        </a>
+                      </li>
+                      {% endif %}
+
+                      {% for i in announcements.paginator.page_range %}
+                        {% if announcements.number == i %}
+                        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% elif i > announcements.number|add:'-3' and i < announcements.number|add:'3' %}
+                        <li class="page-item">
+                          <a class="page-link" href="?q={{ query }}&page={{ i }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if city_filter %}&city={{ city_filter }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if search_type %}&type={{ search_type }}{% endif %}">{{ i }}</a>
+                        </li>
+                        {% endif %}
+                      {% endfor %}
+
+                      {% if announcements.has_next %}
+                      <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&page={{ announcements.next_page_number }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if city_filter %}&city={{ city_filter }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if search_type %}&type={{ search_type }}{% endif %}">
+                          <i class="fas fa-angle-right"></i>
+                        </a>
+                      </li>
+                      <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&page={{ announcements.paginator.num_pages }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if city_filter %}&city={{ city_filter }}{% endif %}{% if price_min %}&price_min={{ price_min }}{% endif %}{% if price_max %}&price_max={{ price_max }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if search_type %}&type={{ search_type }}{% endif %}">
+                          <i class="fas fa-angle-double-right"></i>
+                        </a>
+                      </li>
+                      {% endif %}
+                    </ul>
+                  </nav>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center py-5">
+                  <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                  <h5>Объявлений не найдено</h5>
+                  <p class="text-muted">Попробуйте изменить параметры поиска или поискать в других разделах</p>
+                </div>
+                {% endif %}
+              </div>
+
+              <!-- Категории -->
+              <div class="tab-pane fade" id="categories-tab-pane" role="tabpanel" tabindex="0">
+                {% if categories %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                  {% for category in categories %}
+                  <div class="col">
+                    <div class="card h-100 shadow-sm hover-lift border-0 rounded-custom">
+                      <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ category.name }}</h5>
+                        <p class="card-text text-muted">
+                          {% if category.parent %}
+                          <i class="fas fa-level-up-alt me-1"></i> {{ category.parent.name }}
+                          {% else %}
+                          <i class="fas fa-sitemap me-1"></i> Корневая категория
+                          {% endif %}
+                        </p>
+                        <p class="card-text mb-0">
+                          <i class="fas fa-bullhorn me-1"></i> Объявлений: {{ category.announcements.count }}
+                        </p>
+                      </div>
+                      <div class="card-footer bg-white border-top-0">
+                        <a href="{% url 'category_detail' category.id %}" class="btn btn-sm btn-outline-primary w-100">
+                          <i class="fas fa-folder-open me-2"></i>Перейти в категорию
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                  <i class="fas fa-folder fa-3x text-muted mb-3"></i>
+                  <h5>Категорий не найдено</h5>
+                  <p class="text-muted">Попробуйте изменить поисковый запрос</p>
+                </div>
+                {% endif %}
+              </div>
+
+              <!-- Новости -->
+              <div class="tab-pane fade" id="news-tab-pane" role="tabpanel" tabindex="0">
+                {% if news %}
+                <div class="list-group">
+                  {% for news_item in news %}
+                  <a href="{% url 'news_detail' news_item.id %}" class="list-group-item list-group-item-action rounded-custom mb-3 shadow-sm hover-lift">
+                    <div class="d-flex gap-3 align-items-center">
+                      {% if news_item.image %}
+                      <img src="{{ news_item.image.url }}" class="rounded-custom" style="width: 100px; height: 75px; object-fit: cover;">
+                      {% else %}
+                      <div class="bg-light rounded-custom d-flex align-items-center justify-content-center" style="width: 100px; height: 75px;">
+                        <i class="fas fa-newspaper fa-2x text-muted"></i>
+                      </div>
+                      {% endif %}
+                      <div>
+                        <h5 class="mb-1">{{ news_item.title }}</h5>
+                        <small class="text-muted">
+                          <i class="far fa-calendar-alt me-1"></i> {{ news_item.created_at|date:"d.m.Y" }}
+                        </small>
+                        <p class="mb-0 text-muted" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                          {{ news_item.content|striptags|truncatewords:20 }}
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+                  {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                  <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                  <h5>Новостей не найдено</h5>
+                  <p class="text-muted">Попробуйте изменить поисковый запрос</p>
+                </div>
+                {% endif %}
+              </div>
+
+              <!-- Пользователи -->
+              {% if user.is_authenticated %}
+              <div class="tab-pane fade" id="users-tab-pane" role="tabpanel" tabindex="0">
+                {% if users %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                  {% for user_item in users %}
+                  <div class="col">
+                    <div class="card h-100 border-0 shadow-sm hover-lift rounded-custom text-center">
+                      <div class="card-body">
+                        {% if user_item.userprofile.avatar %}
+                        <img src="{{ user_item.userprofile.avatar.url }}" class="rounded-circle mb-3" width="80" height="80" style="object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                          <i class="fas fa-user fa-2x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <h5 class="card-title mb-1">{{ user_item.get_full_name|default:user_item.username }}</h5>
+                        <p class="small text-muted mb-2">
+                          <i class="fas fa-user me-1"></i> {{ user_item.username }}
+                        </p>
+                        <p class="small mb-0">
+                          <i class="fas fa-bullhorn me-1"></i> Объявлений: {{ user_item.announcements.count }}
+                        </p>
+                      </div>
+                      <div class="card-footer bg-white border-top-0">
+                        <a href="#" class="btn btn-sm btn-outline-primary w-100">
+                          <i class="fas fa-user me-2"></i>Профиль
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                  <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                  <h5>Пользователей не найдено</h5>
+                  <p class="text-muted">Попробуйте изменить поисковый запрос</p>
+                </div>
+                {% endif %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Если нет запроса, показываем подсказку -->
+          {% else %}
+          <div class="text-center py-5">
+            <div class="mb-4">
+              <i class="fas fa-search fa-5x text-primary mb-3"></i>
+              <h2 class="h4">Начните поиск по сайту</h2>
+              <p class="text-muted">Введите запрос в строке поиска для поиска объявлений, категорий, новостей и пользователей</p>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-3 g-4 mt-4">
+              <div class="col">
+                <div class="card border-0 shadow-sm hover-lift rounded-custom h-100">
+                  <div class="card-body text-center">
+                    <i class="fas fa-bullhorn fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Объявления</h5>
+                    <p class="card-text text-muted">Поиск по заголовкам и описаниям объявлений</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="card border-0 shadow-sm hover-lift rounded-custom h-100">
+                  <div class="card-body text-center">
+                    <i class="fas fa-layer-group fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Категории</h5>
+                    <p class="card-text text-muted">Поиск по названиям категорий</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="card border-0 shadow-sm hover-lift rounded-custom h-100">
+                  <div class="card-body text-center">
+                    <i class="fas fa-newspaper fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Новости</h5>
+                    <p class="card-text text-muted">Поиск по заголовкам и содержанию новостей</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+<style>
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .rounded-custom {
+    border-radius: var(--border-radius) !important;
+  }
+
+  .rounded-top-custom {
+    border-top-left-radius: var(--border-radius) !important;
+    border-top-right-radius: var(--border-radius) !important;
+  }
+
+  .nav-tabs .nav-link {
+    color: var(--text-dark);
+    border: none;
+    padding: 0.75rem 1.25rem;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+  }
+
+  .nav-tabs .nav-link:hover {
+    color: var(--primary);
+    background-color: rgba(46, 139, 87, 0.05);
+    border-bottom: 3px solid rgba(46, 139, 87, 0.3);
+  }
+
+  .nav-tabs .nav-link.active {
+    color: var(--primary);
+    background-color: rgba(46, 139, 87, 0.1);
+    border-bottom: 3px solid var(--primary);
+  }
+
+  .search-form .input-group-text,
+  .search-form .form-control {
+    border-color: #e8e8e8;
+  }
+
+  .search-form .form-control:focus {
+    box-shadow: none;
+    border-color: var(--primary);
+  }
+
+  .search-form .input-group-text {
+    transition: border-color 0.3s ease;
+  }
+
+  .search-form .form-control:focus + .input-group-text {
+    border-color: var(--primary);
+  }
+
+  .page-link {
+    border-color: #e8e8e8;
+    color: var(--text-dark);
+    transition: all 0.3s ease;
+  }
+
+  .page-link:hover {
+    background-color: rgba(46, 139, 87, 0.1);
+    color: var(--primary);
+    border-color: #e8e8e8;
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  /* Стили для заголовков разделов */
+  .card-body h1.h3,
+  .page-header-section h1,
+  h2.h5.mb-3,
+  .card-title.fw-bold,
+  .card h5.card-title {
+    color: #1e5631; /* Тёмно-зелёный цвет для заголовков */
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent);
+    padding: 8px 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    display: inline-block;
+  }
+
+  /* Для заголовков в карточках */
+  .card .card-title.fw-bold,
+  .card h5.card-title {
+    background: transparent;
+    color: #1e5631;
+    border-bottom: 2px solid rgba(46, 139, 87, 0.2);
+    text-shadow: none;
+    padding: 0 0 5px 0;
+    margin-bottom: 10px;
+    display: block;
+  }
+</style>
 {% endblock content %}

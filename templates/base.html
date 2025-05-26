@@ -6,11 +6,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Чистый Мир{% endblock title %}</title>
+  <link href="{% static 'autocomplete_light/vendor/select2/dist/css/select2.min.css' %}" rel="stylesheet"/>
+<link href="{% static 'autocomplete_light/select2.css' %}" rel="stylesheet"/>
+
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon/apple-touch-icon.png' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon/favicon-16x16.png' %}">
+  <link rel="shortcut icon" href="{% static 'images/photo_2025-04-15_14-26-50.jpg' %}">
+  <meta name="theme-color" content="#2E8B57">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Nunito:wght@400;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -21,36 +31,52 @@
   <!-- AOS Animation CSS -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+  
   <!-- Custom CSS -->
-  <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+  <link href="{% static 'style.css' %}" rel="stylesheet">
+<link href="{% static 'fkko.css' %}" rel="stylesheet">
+
   
   <style>
     :root {
       --primary: #2E8B57; /* Основной зеленый цвет */
       --primary-dark: #1a5e3a;
       --primary-light: #4CAF50;
+      --primary-gradient: linear-gradient(135deg, #2E8B57 0%, #3CB371 100%);
       --accent: #FF6B6B; /* Акцентный цвет */
       --accent-dark: #e05252;
+      --accent-gradient: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
       --success: #4CAF50;
       --info: #17a2b8;
       --warning: #FFC107;
       --danger: #e74c3c;
       --background: #F8F9FA;
+      --card-bg: rgba(255, 255, 255, 0.92);
       --text-dark: #2C3E50;
       --text-light: #6C757D;
       --border-radius: 12px;
+      --border-radius-lg: 16px;
+      --border-radius-sm: 8px;
       --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      --box-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.15);
+      --transition-normal: all 0.3s ease;
+      --transition-slow: all 0.5s ease;
     }
     
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       color: var(--text-dark);
       background-color: var(--background);
       line-height: 1.6;
       background-image: url('{% static "images/Frame 19.png" %}');
-      background-attachment: fixed;
-      background-size: cover;
-      background-position: center;
+      background-attachment: scroll;
+      
+background-size: 60%;
+
+	background-repeat: no-repeat;
+      background-position: top center;
       position: relative;
     }
     
@@ -62,45 +88,65 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(255, 255, 255, 0.65);
+      background-color: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(1px);
       z-index: -1;
     }
     
     .container {
-      background-color: rgba(255, 255, 255, 0.85);
-      border-radius: var(--border-radius);
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius-lg);
       box-shadow: var(--box-shadow);
-      padding: 20px;
+      padding: 25px;
+      transition: var(--transition-normal);
+    }
+    
+    .container:hover {
+      box-shadow: var(--box-shadow-hover);
     }
     
     main .container {
-      margin-top: 20px;
-      margin-bottom: 20px;
+      margin-top: 30px;
+      margin-bottom: 30px;
     }
     
     h1, h2, h3, h4, h5, h6 {
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-dark);
+      letter-spacing: -0.02em;
     }
     
     /* Обновленные стили навигации */
     .navbar {
       background-color: rgba(255, 255, 255, 0.95);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
     
     .navbar-brand {
       font-weight: 700;
       color: var(--primary);
-      font-size: 1.5rem;
+      font-size: 1.75rem;
+      transition: var(--transition-normal);
+    }
+    
+    .navbar-brand:hover {
+      transform: scale(1.05);
+      color: var(--primary-dark);
     }
     
     .navbar-nav .nav-link {
       color: var(--text-dark);
       font-weight: 500;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      transition: all 0.3s;
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition-normal);
+      margin: 0 3px;
+      position: relative;
     }
     
     .navbar-nav .nav-link:hover, 
@@ -109,77 +155,110 @@
       background-color: rgba(46, 139, 87, 0.1);
     }
     
+    .navbar-nav .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 8px;
+      left: 20%;
+      width: 60%;
+      height: 3px;
+      background: var(--primary-gradient);
+      border-radius: 3px;
+    }
+    
     .navbar-nav .nav-link i {
       margin-right: 0.4rem;
     }
     
     /* Кнопки */
     .btn {
-      font-weight: 500;
+      font-weight: 600;
       border-radius: var(--border-radius);
-      padding: 0.5rem 1.5rem;
-      transition: all 0.3s ease;
+      padding: 0.65rem 1.75rem;
+      transition: var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.5px;
+      z-index: 1;
+    }
+    
+    .btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: var(--transition-normal);
+      z-index: -1;
+    }
+    
+    .btn:hover::after {
+      height: 100%;
     }
     
     .btn-primary {
-      background-color: var(--primary);
-      border-color: var(--primary);
+      background: var(--primary-gradient);
+      border: none;
     }
     
     .btn-primary:hover {
-      background-color: var(--primary-dark);
-      border-color: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(46, 139, 87, 0.3);
+      background: var(--primary-gradient);
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(46, 139, 87, 0.4);
     }
     
     .btn-accent {
-      background-color: var(--accent);
-      border-color: var(--accent);
+      background: var(--accent-gradient);
+      border: none;
       color: white;
     }
     
     .btn-accent:hover {
-      background-color: #ff5252;
-      border-color: #ff5252;
+      background: var(--accent-gradient);
       color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(255, 107, 107, 0.4);
     }
     
     .btn-hero {
-      padding: 0.75rem 2rem;
-      font-weight: 600;
-      transition: all 0.3s;
+      padding: 0.85rem 2.25rem;
+      font-weight: 700;
+      transition: var(--transition-normal);
     }
     
     .btn-hero:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     }
     
     .btn-outline-primary {
       color: var(--primary);
-      border-color: var(--primary);
+      border: 2px solid var(--primary);
+      background-color: transparent;
     }
     
     .btn-outline-primary:hover {
-      background-color: var(--primary);
-      border-color: var(--primary);
-      transform: translateY(-2px);
+      color: white;
+      background: var(--primary-gradient);
+      border-color: transparent;
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(46, 139, 87, 0.3);
     }
     
     /* Карточки */
     .card {
       border: none;
-      border-radius: var(--border-radius);
+      border-radius: var(--border-radius-lg);
       overflow: hidden;
-      transition: all 0.3s ease;
+      transition: var(--transition-normal);
+      background-color: var(--card-bg);
     }
     
     .card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--box-shadow);
+      transform: translateY(-7px);
+      box-shadow: var(--box-shadow-hover);
     }
     
     .shadow-custom {
@@ -187,64 +266,108 @@
     }
     
     .rounded-custom {
-      border-radius: var(--border-radius);
+      border-radius: var(--border-radius-lg);
     }
     
     .card-title {
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-dark);
+      margin-bottom: 0.85rem;
     }
     
     /* Секция героя */
     .hero-section {
-      background: linear-gradient(rgba(0, 77, 64, 0.5), rgba(0, 77, 64, 0.7));
+      background: linear-gradient(135deg, rgba(0, 77, 64, 0.7), rgba(0, 120, 100, 0.7));
       background-size: cover;
       background-position: center;
-      height: 500px;
+      height: 600px;
       display: flex;
       align-items: center;
       color: white;
       position: relative;
-      margin-bottom: 3rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
+      margin-bottom: 4rem;
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--box-shadow-hover);
+      overflow: hidden;
+    }
+    
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+      z-index: 1;
     }
     
     .hero-content {
       z-index: 10;
+      padding: 0 20px;
     }
     
     .hero-title {
-      font-size: 3rem;
-      font-weight: 700;
+      font-size: 3.5rem;
+      font-weight: 800;
       margin-bottom: 1.5rem;
       line-height: 1.2;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      animation: fadeInUp 1s ease-out;
     }
     
     .hero-text {
-      font-size: 1.2rem;
-      margin-bottom: 2rem;
+      font-size: 1.35rem;
+      margin-bottom: 2.5rem;
       max-width: 600px;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+      animation: fadeInUp 1.2s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     /* Заголовки секций */
     .section-title {
-      font-weight: 700;
-      margin-bottom: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.75rem;
       position: relative;
       display: inline-block;
+      padding-bottom: 10px;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--primary-gradient);
+      border-radius: 4px;
     }
     
     /* Стили для категорий */
     .category-card {
-      transition: all 0.3s;
+      transition: var(--transition-normal);
       border: none;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      border-radius: var(--border-radius-lg);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      height: 100%;
     }
     
     .category-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
     }
     
     .category-img {
@@ -320,7 +443,35 @@
       margin-right: 0.5rem;
       transition: all 0.3s;
     }
-    
+    .page-header {
+  /* на всякий случай убедимся, что фон белый */
+  background-color: #fff;
+}
+
+/* Заголовок */
+.page-header h1 {
+  color: var(--text-dark) !important;
+  text-shadow: none !important;
+}
+
+.page-header .breadcrumb {
+  --bs-breadcrumb-divider: "/";
+}
+
+/* 2) Красим сам “/” в тёмный цвет */
+.page-header .breadcrumb-item + .breadcrumb-item::before {
+  content: var(--bs-breadcrumb-divider);
+  color: var(--text-dark) !important;
+  padding: 0 0.5rem;
+}
+
+/* 3) Красим ссылки и активный пункт */
+.page-header .breadcrumb .breadcrumb-item a,
+.page-header .breadcrumb .breadcrumb-item.active {
+  color: var(--text-dark) !important;
+}
+
+
     .social-icons a:hover {
       background-color: var(--primary-dark);
       transform: translateY(-3px);
@@ -410,6 +561,166 @@
       background-color: #c0392b;
       border-color: #b13427;
     }
+    
+    /* Notification Styles */
+    .notification-bell {
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      color: #555;
+      display: inline-block;
+    }
+    
+    .nav-link:hover .notification-bell {
+      transform: rotate(12deg);
+      color: var(--primary);
+    }
+    
+    .notification-badge {
+      top: 3px;
+      right: -5px;
+      font-size: 0.65rem;
+      padding: 0.35em 0.55em;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    @media (max-width: 576px) {
+  /* ——— Базовые переменные для мобильных ——— */
+  :root {
+    --fs-base-mobile: 0.875rem;
+    --gutter-mobile: 0.75rem;
+    --btn-height-mobile: 3rem;
+  }
+  html {
+    font-size: var(--fs-base-mobile);
+  }
+  body {
+    padding: 0 var(--gutter-mobile);
+  }
+  .container {
+    padding: var(--gutter-mobile);
+  }
+
+  /* ——— Navbar ——— */
+  .navbar {
+    padding: 0.5rem var(--gutter-mobile);
+  }
+  .navbar-brand {
+    font-size: 1rem;
+  }
+  .navbar-brand img {
+    height: 40px;
+  }
+  .navbar-brand .d-sm-flex {
+    display: none;
+  }
+  .navbar-toggler {
+    padding: var(--gutter-mobile);
+  }
+  .navbar-nav .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  /* ——— Hero секция ——— */
+  .hero-section {
+    height: auto;
+    padding: 2rem var(--gutter-mobile);
+    text-align: center;
+  }
+  .hero-title {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  .hero-text {
+    font-size: 1rem;
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ——— Тайпографика ——— */
+  h1 { font-size: 1.75rem; line-height: 1.3; }
+  h2 { font-size: 1.5rem;  line-height: 1.3; }
+  h3 { font-size: 1.25rem; line-height: 1.3; }
+  h4, h5, h6 { font-size: 1.125rem; line-height: 1.3; }
+  p, .nav-link {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: var(--gutter-mobile);
+  }
+
+  /* ——— Кнопки и интерактив ——— */
+  .btn {
+    display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    width: 100%;
+    height: var(--btn-height-mobile);
+    padding: 20px;
+    font-size: 1rem;
+    line-height: var(--btn-height-mobile);
+    margin-bottom: var(--gutter-mobile);
+  }
+
+  /* ——— Формы и поля ввода ——— */
+  .form-control,
+  .form-select,
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-bottom: var(--gutter-mobile);
+  }
+  /* Для Select2 */
+  .select2-container--default .select2-selection--single {
+    height: auto;
+    padding: 0.75rem;
+  }
+  .select2-container .select2-dropdown {
+    font-size: 1rem;
+  }
+
+  /* ——— Карточки и списки ——— */
+  .card {
+    margin-bottom: var(--gutter-mobile);
+  }
+  .category-card .category-img {
+    height: 120px;
+    object-fit: cover;
+  }
+
+  /* ——— Прочие мелочи ——— */
+  .section-title {
+    font-size: 1.25rem;
+    padding-bottom: 0.5rem;
+  }
+}
+.card.position-relative > .bg-primary,
+  .card.position-relative > .bg-accent {
+    z-index: -1;
+  }
+
+  /* Все остальное внутри карточки поверх */
+  .card.position-relative > *:not(.bg-primary):not(.bg-accent) {
+    position: relative;
+    z-index: 1;
+  }
+
+
+
   </style>
   
   {% block extra_css %}{% endblock extra_css %}
@@ -419,14 +730,32 @@
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg sticky-top">
     <div class="container">
-      <a class="navbar-brand" href="{% url 'index' %}">
-        <i class="fas fa-leaf me-2"></i>Чистый Мир
-      </a>
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
+  <!-- Увеличили высоту до 64px -->
+  <img
+    src="{% static 'images/photo_2025-04-15_14-26-50.jpg' %}"
+    alt="Чистый Мир"
+    height="64"
+    class="me-2"
+  >
+  <div class="d-none d-sm-flex flex-column">
+    <!-- Добавили утилиту fs-6 для самого маленького размера шрифта в Bootstrap -->
+    <span class="fw-bold fs-6">Чистый Мир</span>
+    <span class="fw-bold fs-6">WINDEXS</span>
+  </div>
+</a>
+
+
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+          <li class="nav-item">
+            <a class="nav-link {% if 'global_search' in request.path %}active{% endif %}" href="{% url 'global_search' %}">
+              <i class="fas fa-search"></i> Поиск
+            </a>
+          </li>
           <li class="nav-item">
             <a class="nav-link {% if 'announcement_list' in request.path %}active{% endif %}" href="{% url 'announcement_list' %}">
               <i class="fas fa-th-large"></i> Объявления
@@ -443,7 +772,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link {% if request.path == '/donation/' %}active{% endif %} text-accent fw-bold" href="{% url 'donation' %}">
+            <a class="nav-link {% if request.path == '/donation/' %}active{% endif %} text-accent fw-bold" href="{% if user.is_authenticated %}{% url 'donation' %}{% else %}{% url 'login' %}?next={% url 'donation' %}{% endif %}">
               <i class="fas fa-heart me-1"></i>Пожертвовать
             </a>
           </li>
@@ -490,10 +819,32 @@
           </li>
           {% endif %}
           <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-            <a href="{% url 'announcement_create' %}" class="btn btn-primary">
+            <a href="{% if user.is_authenticated %}{% url 'announcement_create' %}{% else %}{% url 'login' %}?next={% url 'announcement_create' %}{% endif %}" class="btn btn-primary">
               <i class="fas fa-plus me-1"></i> Добавить объявление
             </a>
           </li>
+          {% if user.is_staff %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'admin_announcement_approval' %}">
+              <i class="fas fa-check-circle"></i> Одобрение объявлений
+              {% if pending_count %}
+              <span class="badge bg-danger">{{ pending_count }}</span>
+              {% endif %}
+            </a>
+          </li>
+          {% endif %}
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link position-relative" href="{% url 'notifications' %}" title="Уведомления">
+              <i class="fas fa-bell notification-bell"></i>
+              {% if unread_notifications_count > 0 %}
+              <span class="position-absolute notification-badge translate-middle badge rounded-pill bg-danger">
+                {{ unread_notifications_count }}
+              </span>
+              {% endif %}
+            </a>
+          </li>
+          {% endif %}
         </ul>
       </div>
     </div>
@@ -550,7 +901,7 @@
           <ul class="footer-links">
             <li><a href="{% url 'register' %}">Регистрация</a></li>
             <li><a href="{% url 'login' %}">Вход</a></li>
-            <li><a href="{% url 'announcement_create' %}">Добавить объявление</a></li>
+            <li><a href="{% if user.is_authenticated %}{% url 'announcement_create' %}{% else %}{% url 'login' %}?next={% url 'announcement_create' %}{% endif %}">Добавить объявление</a></li>
             {% if user.is_authenticated %}
             <li><a href="{% url 'profile' %}">Профиль</a></li>
             {% endif %}
@@ -568,7 +919,7 @@
       </div>
       <hr class="my-4">
       <div class="text-center">
-        <p class="mb-0">&copy; 2023 Чистый Мир. Все права защищены.</p>
+        <p class="mb-0">&copy; 2025 Чистый Мир. Все права защищены.</p>
       </div>
     </div>
   </footer>
@@ -588,6 +939,13 @@
       });
     });
   </script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+xOJzJ5U6Jv25YwooLbpAuDpP+W57XMU6NFwOV0="
+        crossorigin="anonymous"></script>
+<!-- Select2 JS -->
+<script src="{% static 'autocomplete_light/vendor/select2/dist/js/select2.full.min.js' %}"></script>
+<!-- DAL core JS -->
+<script src="{% static 'autocomplete_light/autocomplete.init.js' %}"></script>
   
   {% block extra_js %}{% endblock extra_js %}
 </body>

@@ -39,10 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'mptt',
     'blog',
     'templatetags',
+    'dal',
+    'dal_select2',
 ]
+FKKO_API_URL = 'https://rpn.gov.ru/fkko/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -87,6 +91,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'blog.views.pending_announcements_processor',
+                'blog.views.unread_notifications_processor',
             ],
         },
     },

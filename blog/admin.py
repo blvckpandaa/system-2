@@ -12,26 +12,17 @@ from .models import (
     User,
     UserProfile, Banner, Plan, AnalyticsDummy,
     Category, Announcement, AnnouncementImage, GalleryImage,
-    Payment, Favorite, Comment, News, Chat, Message, OtherAnnouncement, Donation
+    Payment, Favorite, Comment, News, Chat, Message, OtherAnnouncement, Donation, Notification
 )
 
-# ===========================================
-# 1) Custom UserAdmin
-# ===========================================
+
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
-    """
-    Bizning custom User (AbstractUser) modeli uchun admin.
-    DjangoUserAdmin dan meros olsak, admin panelda standart user sahifasini olamiz.
-    """
     model = User
-    # 'id' ni ko'rsatish uchun modelga integer primary key bo'lsa bas.
     list_display = ('id', 'username', 'email', 'date_joined', 'is_staff', 'is_active')
     search_fields = ('username', 'email')
     readonly_fields = ('last_login', 'date_joined')
-    ordering = ('-date_joined',)  # so'nggi ro'yxatdan o'tganlarni tepaga chiqarish
-
-    # Agar qo'shimcha maydonlar bo'lsa, fieldsetlarni kengaytirish mumkin:
+    ordering = ('-date_joined',)  
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Personal info', {
@@ -82,19 +73,17 @@ class CategoryAdmin(MPTTModelAdmin):
     list_filter = ('parent',)
 
 
-# ===========================================
-# 2) E'lon rasmlari inlines (AnnouncementImage)
-# ===========================================
+
 class AnnouncementImageInline(admin.TabularInline):
     model = AnnouncementImage
-    extra = 1  # Bitta bo'sh qator
+    extra = 1 
 
 
 @admin.register(Announcement)
 class AnnouncementAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'title', 'user', 'category',
-        'price', 'priority', 'status', 'views_count', 'created_at'
+        'price', 'priority', 'status', 'views_count','fkko_code', 'created_at'
     )
     list_filter = ('status', 'category', 'plan', 'created_at')
     search_fields = ('title', 'description', 'user__username')
@@ -103,18 +92,12 @@ class AnnouncementAdmin(admin.ModelAdmin):
     list_editable = ('status',)
 
     def get_form(self, request, obj=None, **kwargs):
-        """
-        Avtomatik ravishda 'user' ni joriy admin foydalanuvchisiga to'ldirib qo'yish.
-        """
         form = super().get_form(request, obj, **kwargs)
         if 'user' in form.base_fields:
             form.base_fields['user'].initial = request.user
         return form
 
     def save_model(self, request, obj, form, change):
-        """
-        Agar user tanlanmagan bo'lsa, joriy admin foydalanuvchisini qo'yish.
-        """
         if not obj.user_id:
             obj.user = request.user
         super().save_model(request, obj, form, change)
@@ -127,7 +110,7 @@ class AnnouncementAdmin(admin.ModelAdmin):
                 ('price', 'is_negotiable'),
                 'category',
                 ('condition', 'location', 'city', 'phone'),
-                'user',  # Foydalanuvchi
+                'user', 
             ),
         }),
         ("SEO", {
@@ -207,15 +190,33 @@ class OtherAnnouncementAdmin(admin.ModelAdmin):
 
 @admin.register(Donation)
 class DonationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'amount', 'paid', 'created_at')
+    list_display = ('user', 'amount', 'created_at', 'paid')
     list_filter = ('paid', 'created_at')
-    search_fields = ('user__username', 'payment_id')
+    search_fields = ('user__username', 'user__email')
     date_hierarchy = 'created_at'
-    readonly_fields = ('payment_id',)
 
-# ===========================================
-# 5) "Analitika" uchun alohida custom view
-# ===========================================
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('title', 'notification_type', 'created_at', 'is_read')
+    list_filter = ('notification_type', 'is_read', 'created_at')
+    search_fields = ('title', 'message')
+    date_hierarchy = 'created_at'
+    readonly_fields = ('content_type', 'object_id', 'content_object')
+    
+    actions = ['mark_as_read', 'mark_as_unread']
+    
+    def mark_as_read(self, request, queryset):
+        updated = queryset.update(is_read=True)
+        self.message_user(request, f'Отмечено как прочитанное: {updated} уведомлений.')
+    mark_as_read.short_description = "Отметить как прочитанное"
+    
+    def mark_as_unread(self, request, queryset):
+        updated = queryset.update(is_read=False)
+        self.message_user(request, f'Отмечено как непрочитанное: {updated} уведомлений.')
+    mark_as_unread.short_description = "Отметить как непрочитанное"
+
+
 class MyAdminSite(admin.AdminSite):
     site_header = "Super Admin Panel"
     site_title = "Admin"
@@ -248,9 +249,7 @@ class MyAdminSite(admin.AdminSite):
             monthly_payments=monthly_payments,
         )
         return render(request, 'admin/my_custom_analytics.html', context)
-
-# endi MyAdminSite bilan parallel bo'lishi mumkin
-# agar default admin.py o'rniga butunlay shuni ishlatmoqchi bo'lsangiz:
+    
 custom_admin_site = MyAdminSite(name='myadmin')
 
 custom_admin_site.register(User, UserAdmin)
@@ -270,3 +269,4 @@ custom_admin_site.register(Chat, ChatAdmin)
 custom_admin_site.register(Message, MessageAdmin)
 custom_admin_site.register(OtherAnnouncement, OtherAnnouncementAdmin)
 custom_admin_site.register(Donation, DonationAdmin)
+custom_admin_site.register(Notification, NotificationAdmin)

@@ -1,3 +1,6 @@
+import re
+
+from bs4 import BeautifulSoup
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotAllowed
 from django.core.exceptions import PermissionDenied
@@ -12,10 +15,11 @@ from yookassa import Configuration, Payment as YooPayment
 from django.contrib import messages
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
 from .models import (
     User, UserProfile, Banner, Plan, AnalyticsDummy,
     Category, Announcement, AnnouncementImage, Payment, Favorite,
-    Comment, News, Chat, Message, GalleryImage, OtherAnnouncement, Donation
+    Comment, News, Chat, Message, GalleryImage, OtherAnnouncement, Donation, Notification
 )
 from .forms import (
     RegisterForm, LoginForm, AnnouncementForm, CommentForm
@@ -24,14 +28,40 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Sum
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+from django.template.context_processors import request
+import requests
+from dal import autocomplete
+from django.conf import settings
 
-# YOOKASSA SOZLAMALARI
+from .utils.fkko_search import search_fkko
+from .utils.semantic_fkko import semantic_search_fkko
+
 Configuration.account_id = settings.YOOKASSA_SHOP_ID
 Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
 
+def pending_announcements_processor(request):
+    """Context processor to add pending announcements count for admin users"""
+    context = {}
+    if request.user.is_authenticated and request.user.is_staff:
+        context['pending_count'] = Announcement.objects.filter(status='pending').count()
+    return context
+
+def unread_notifications_processor(request):
+    """Context processor to add unread notifications count for authenticated users"""
+    context = {}
+    if request.user.is_authenticated:
+        context['unread_notifications_count'] = Notification.objects.filter(
+            recipient=request.user, 
+            is_read=False
+        ).count()
+    return context
+
 def index_view(request):
     banners = Banner.objects.all()
-    # Получаем только опубликованные объявления, отсортированные по приоритету и дате создания
     elonlar = Announcement.objects.filter(status='published').order_by('-priority', '-created_at')[:6]
     plans = Plan.objects.all()
     news = News.objects.order_by('-created_at')[:3]
@@ -50,9 +80,7 @@ def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()  # user saqlanadi
-            # Avtomatik login qilmoqchi bo'lsak:
-            # login(request, user)
+            user = form.save()  
             return redirect('login')
         else:
             return render(request, 'register.html', {'form': form})
@@ -65,8 +93,8 @@ def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request=request, data=request.POST)
         if form.is_valid():
-            user = form.get_user()  # authenticate qilinadi
-            login(request, user)    # sessionga foydalanuvchini kiritdik
+            user = form.get_user() 
+            login(request, user)    
             return redirect('index')
         else:
             return render(request, 'login.html', {'form': form})
@@ -120,6 +148,12 @@ def gallery_list_view(request):
 def plan_list_view(request):
     plans = Plan.objects.all()
     return render(request, 'plans.html', {'plans': plans})
+
+
+def plan_detail_view(request, pk):
+    """Представление для отображения подробной информации о тарифе"""
+    plan = get_object_or_404(Plan, pk=pk)
+    return render(request, 'plan_detail.html', {'plan': plan})
 
 
 def category_list_view(request):
@@ -182,61 +216,80 @@ def announcement_list_view(request):
 def announcement_create_view(request):
     """Create new announcement"""
     if request.method == 'POST':
-        # Создаем форму с данными из запроса
-        form = AnnouncementForm(request.POST)
+        # Проверка количества объявлений пользователя за последний час
+        # чтобы избежать спама
+        one_hour_ago = timezone.now() - timezone.timedelta(hours=1)
+        recent_announcements_count = Announcement.objects.filter(
+            user=request.user, 
+            created_at__gte=one_hour_ago
+        ).count()
         
-        # Выводим полученные данные для отладки
-        print("POST data:", request.POST)
-        print("FILES data:", request.FILES)
-        
-        if form.is_valid():
-            # Создаем объявление, но пока не сохраняем
-            announcement = form.save(commit=False)
-            # Устанавливаем пользователя
-            announcement.user = request.user
-            # Устанавливаем статус черновика
-            announcement.status = 'draft'
-            # Сохраняем объявление
-            announcement.save()
-            
-            # Обрабатываем изображения
-            if 'files' in request.FILES:
-                files = request.FILES.getlist('files')
-                for file in files:
-                    AnnouncementImage.objects.create(
-                        announcement=announcement,
-                        image=file
-                    )
-            
-            # Если выбран тарифный план с оплатой
-            if announcement.plan and announcement.plan.amount > 0:
-                return redirect('payment_create', announcement_id=announcement.id, plan_id=announcement.plan.id)
-            else:
-                # Если бесплатный план или план не выбран, сразу публикуем
-                announcement.status = 'published'
-                announcement.save()
-                return redirect('announcement_detail', pk=announcement.id)
-        else:
-            # В случае ошибок валидации
-            print("Form errors:", form.errors)
-            # Получаем списки категорий и тарифов для повторного отображения формы
+        if recent_announcements_count >= 5:
+            messages.error(request, "Вы можете создать не более 5 объявлений в час. Пожалуйста, попробуйте позже.")
+            form = AnnouncementForm(request.POST)
             categories = Category.objects.all()
             plans = Plan.objects.all()
-            # Передаем форму обратно с ошибками
             return render(request, 'announcement_create.html', {
                 'form': form,
                 'categories': categories,
                 'plans': plans,
             })
-    else:
-        # При GET запросе создаем пустую форму
+        
+        # Используем атомарную транзакцию для предотвращения дублирования объявлений
+        with transaction.atomic():
+            # Создаем форму с данными из запроса
+            form = AnnouncementForm(request.POST)
+            
+            if form.is_valid():
+                announcement = form.save(commit=False)
+                announcement.user = request.user
+                announcement.status = 'pending'  # Change status to pending for moderation
+                print(f"DEBUG: Creating announcement with status: {announcement.status}")
+                
+                # Проверка на запрещенный контент (можно расширить)
+                forbidden_words = ["мошенничество", "нелегальный", "запрещено"]
+                for word in forbidden_words:
+                    if word.lower() in announcement.title.lower() or word.lower() in announcement.description.lower():
+                        messages.error(request, f"Объявление содержит запрещенное слово: {word}")
+                        return render(request, 'announcement_create.html', {
+                            'form': form,
+                            'categories': Category.objects.all(),
+                            'plans': Plan.objects.all(),
+                        })
+                
+                announcement.save()
+                print(f"DEBUG: Saved announcement with ID: {announcement.id}, Status: {announcement.status}")
+                
+                if 'files' in request.FILES:
+                    files = request.FILES.getlist('files')
+                    for file in files:
+                        AnnouncementImage.objects.create(
+                            announcement=announcement,
+                            image=file
+                        )
+                
+                if announcement.plan and announcement.plan.amount > 0:
+                    messages.success(request, "Объявление создано и отправлено на модерацию! Переходим к оплате тарифа.")
+                    return redirect('payment_create', announcement_id=announcement.id, plan_id=announcement.plan.id)
+                else:
+                    # Changed: Announcement stays in pending status
+                    messages.success(request, "Объявление успешно создано и отправлено на модерацию! После проверки администратором оно будет опубликовано.")
+                    return redirect('announcement_detail', pk=announcement.id)
+            else:
+                messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
+                categories = Category.objects.all()
+                plans = Plan.objects.all()
+                return render(request, 'announcement_create.html', {
+                    'form': form,
+                    'categories': categories,
+                    'plans': plans,
+                })
+    else:  # При GET запросе создаем пустую форму
         form = AnnouncementForm()
     
-    # Получаем списки категорий и тарифов из базы данных
     categories = Category.objects.all()
     plans = Plan.objects.all()
-    
-    # Передаем все в шаблон
+
     return render(request, 'announcement_create.html', {
         'form': form,
         'categories': categories,
@@ -252,13 +305,11 @@ def announcement_detail_view(request, pk):
     breadcrumb_list = []
     if ann.category:
         breadcrumb_list = ann.category.get_ancestors(include_self=True)
-    
-    # Проверяем, добавлено ли объявление в избранное текущим пользователем
+
     is_favorite = False
     if request.user.is_authenticated:
         is_favorite = Favorite.objects.filter(user=request.user, announcement=ann).exists()
     
-    # Получаем похожие объявления
     similar_announcements = []
     if ann.category:
         similar_announcements = Announcement.objects.filter(
@@ -266,15 +317,20 @@ def announcement_detail_view(request, pk):
             status='published'
         ).exclude(id=pk)[:3]
 
-    # Всегда используем одинаковый шаблон независимо от источника объявления
     source_type = "user"
+    
+    # Adding admin approval ability
+    is_pending = ann.status == 'pending'
+    is_admin = request.user.is_authenticated and request.user.is_staff
 
     return render(request, 'announcement_detail.html', {
         'announcement': ann,
         'breadcrumb_list': breadcrumb_list,
         'is_favorite': is_favorite,
         'similar_announcements': similar_announcements,
-        'source_type': source_type
+        'source_type': source_type,
+        'is_pending': is_pending,
+        'is_admin': is_admin
     })
 
 
@@ -291,13 +347,29 @@ def announcement_update_view(request, pk):
             updated = form.save(commit=False)
             if updated.plan:
                 updated.priority = updated.plan.priority
+            # If the announcement is in draft status, set it to pending when updated
+            if updated.status == 'draft':
+                updated.status = 'pending'
             updated.save()
             return redirect('announcement_detail', pk=pk)
         else:
-            return render(request, 'announcement_create.html', {'form': form})
+            categories = Category.objects.all()
+            plans = Plan.objects.all()
+            return render(request, 'announcement_create.html', {
+                'form': form,
+                'categories': categories,
+                'plans': plans
+            })
     else:
         form = AnnouncementForm(instance=ann)
-        return render(request, 'announcement_create.html', {'form': form})
+        categories = Category.objects.all()
+        plans = Plan.objects.all()
+        return render(request, 'announcement_create.html', {
+            'form': form,
+            'categories': categories,
+            'plans': plans
+        })
+
 
 
 @login_required
@@ -370,8 +442,9 @@ def create_payment_view(request, announcement_id, plan_id):
         pay = Payment.objects.create(user=request.user, announcement=announcement, plan=plan, amount=0, payment_id='', paid=True)
         announcement.plan = plan
         announcement.priority = plan.priority
-        announcement.status = 'published'
+        # Status stays as 'pending' instead of being set to 'published'
         announcement.save()
+        messages.success(request, "План применен. Объявление ожидает проверки администратором.")
         return redirect('announcement_detail', pk=announcement.pk)
     try:
         yoo_payment = YooPayment.create({
@@ -427,8 +500,9 @@ def check_payment_status_view(request, payment_id):
             ann = pay.announcement
             ann.plan = pay.plan
             ann.priority = pay.plan.priority
-            ann.status = 'published' 
+            # Status stays as 'pending' instead of being set to 'published'
             ann.save()
+            messages.success(request, "Оплата прошла успешно. Объявление ожидает проверки администратором.")
         return redirect('announcement_detail', pk=pay.announcement.pk)
 
     elif yoo_pay.status == 'pending':
@@ -449,7 +523,7 @@ def check_payment_status_view(request, payment_id):
 @login_required
 def favorite_list_view(request):
     favs = Favorite.objects.filter(user=request.user)
-    return render(request, 'favorites_list.html', {'favs': favs})
+    return render(request, 'favorite_list.html', {'favs': favs})
 
 @login_required
 def favorite_add_view(request):
@@ -507,20 +581,53 @@ def announcement_recommendation_view(request, pk):
 
 
 def global_search_view(request):
-    query = request.GET.get('q', '').strip()
-    ann_qs = Announcement.objects.none()
-    cat_qs = Category.objects.none()
+    query = request.GET.get('q', '')
+    category_id = request.GET.get('category', '')
+    city = request.GET.get('city', '')
+
+    # Начальное фильтрующее условие: только опубликованные объявления
+    announcements = Announcement.objects.filter(status='published')
+
+    # Фильтрация по поисковому запросу
     if query:
-        ann_qs = Announcement.objects.filter(
-            Q(title__icontains=query) | Q(description__icontains=query),
-            status='published'
+        announcements = announcements.filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(fkko_code__icontains=query)  # Добавляем поиск по коду ФККО
         )
-        cat_qs = Category.objects.filter(name__icontains=query)
-    return render(request, 'search.html', {
+
+    # Фильтрация по категории
+    if category_id:
+        try:
+            category = Category.objects.get(id=category_id)
+            # Получаем все подкатегории
+            descendant_ids = category.get_descendants(include_self=True).values_list('id', flat=True)
+            announcements = announcements.filter(category__in=descendant_ids)
+        except Category.DoesNotExist:
+            pass
+
+    # Фильтрация по городу
+    if city:
+        announcements = announcements.filter(city__icontains=city)
+
+    # Сортировка по приоритету и дате
+    announcements = announcements.order_by('-priority', '-created_at')
+
+    # Получаем список уникальных городов для фильтра
+    cities = Announcement.objects.filter(status='published').exclude(city__isnull=True).exclude(city='').values_list(
+        'city', flat=True).distinct()
+
+    # Передаем данные в контекст
+    context = {
         'query': query,
-        'announcements': ann_qs,
-        'categories': cat_qs
-    })
+        'category_id': category_id,
+        'city': city,
+        'announcements': announcements,
+        'cities': cities,
+        'categories': Category.objects.all(),  # передаем все категории для фильтра
+    }
+
+    return render(request, 'search.html', context)
 
 
 def news_list_view(request):
@@ -577,13 +684,17 @@ def user_announcements_view(request):
     
     # Считаем количество объявлений по статусам
     published_count = announcements.filter(status='published').count()
+    pending_count = announcements.filter(status='pending').count()  # Added for pending count
     draft_count = announcements.filter(status='draft').count()
     archived_count = announcements.filter(status='archived').count()
+    
+    print(f"DEBUG: User {request.user.username} has {pending_count} pending announcements")
+    print(f"DEBUG: Status counts - published: {published_count}, pending: {pending_count}, draft: {draft_count}, archived: {archived_count}")
     
     context = {
         'announcements': announcements,
         'approved_count': published_count,
-        'pending_count': 0,  # У вас нет статуса "на модерации", оставляем 0
+        'pending_count': pending_count,  # Added to context
         'draft_count': draft_count,
         'archived_count': archived_count
     }
@@ -704,4 +815,102 @@ def yookassa_webhook(request):
         return JsonResponse({'status': 'success'})
     
     return JsonResponse({'status': 'error'}, status=405)
+
+@login_required
+def admin_announcement_approval_view(request):
+    """View for administrators to approve or reject pending announcements"""
+    # Check if user is staff/admin
+    if not request.user.is_staff:
+        raise PermissionDenied("Только администраторы могут одобрять объявления.")
+    
+    # Get pending announcements
+    pending_announcements = Announcement.objects.filter(status='pending').order_by('-created_at')
+    print(f"DEBUG: Admin approval page found {pending_announcements.count()} pending announcements")
+    for ann in pending_announcements:
+        print(f"DEBUG: Pending announcement ID: {ann.id}, Title: {ann.title}, User: {ann.user.username}")
+    
+    # Handle approval/rejection
+    if request.method == 'POST':
+        announcement_id = request.POST.get('announcement_id')
+        action = request.POST.get('action')
+        
+        if announcement_id and action:
+            announcement = get_object_or_404(Announcement, id=announcement_id)
+            
+            if action == 'approve':
+                announcement.status = 'published'
+                announcement.save()
+                # Create notification for the announcement owner
+                Notification.objects.create(
+                    recipient=announcement.user,
+                    content_type=ContentType.objects.get_for_model(announcement),
+                    object_id=announcement.id,
+                    title="Объявление одобрено",
+                    message=f"Ваше объявление \"{announcement.title}\" было одобрено администратором и опубликовано.",
+                    notification_type="announcement_approved"
+                )
+                messages.success(request, f"Объявление '{announcement.title}' одобрено и опубликовано.")
+            elif action == 'reject':
+                announcement.status = 'draft'
+                announcement.save()
+                # Create notification for the announcement owner
+                Notification.objects.create(
+                    recipient=announcement.user,
+                    content_type=ContentType.objects.get_for_model(announcement),
+                    object_id=announcement.id,
+                    title="Объявление отклонено",
+                    message=f"Ваше объявление \"{announcement.title}\" было отклонено администратором. Вы можете отредактировать его и отправить на повторное рассмотрение.",
+                    notification_type="announcement_rejected"
+                )
+                messages.warning(request, f"Объявление '{announcement.title}' отклонено.")
+            
+            # Check if request came from the detail page and redirect back there
+            referer = request.META.get('HTTP_REFERER', '')
+            if f'/announcements/{announcement_id}/' in referer:
+                return redirect('announcement_detail', pk=announcement_id)
+            
+    return render(request, 'admin_announcement_approval.html', {
+        'pending_announcements': pending_announcements
+    })
+
+@login_required
+def user_notifications_view(request):
+    """Display notifications for the current user"""
+    notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')
+    
+    # Mark notifications as read when viewed
+    if request.GET.get('mark_read') == 'true':
+        notifications.update(is_read=True)
+    
+    # Get unread count for the navbar
+    unread_count = notifications.filter(is_read=False).count()
+    
+    context = {
+        'notifications': notifications,
+        'unread_count': unread_count
+    }
+    
+    return render(request, 'notifications.html', context)
+
+class FkkoAutocomplete(autocomplete.Select2ListView):
+    """
+    Автодополнение из локального CSV с кодами ФККО.
+    """
+    def get_list(self):
+        term = self.q or ''
+        results = search_fkko(term)
+        return [f"{row['code']} — {row['name']}" for row in results]
+def fkko_suggestions(request):
+    q = request.GET.get('q', '').strip()
+    if len(q) < 2:
+        from .utils.fkko_search import search_fkko
+        return JsonResponse(search_fkko(q, limit=10), safe=False)
+
+    sem = semantic_search_fkko(q, top_k=10, threshold=0.45)
+    if sem:
+        return JsonResponse(sem, safe=False)
+
+    # fallback на простую подстроку
+    from .utils.fkko_search import search_fkko
+    return JsonResponse(search_fkko(q, limit=10), safe=False)
 
