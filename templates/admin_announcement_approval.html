@@ -1,0 +1,71 @@
+<!-- Create a new file: templates/admin_announcement_approval.html -->
+{% extends 'base.html' %}
+
+{% block title %}Одобрение объявлений{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Управление объявлениями</h1>
+    
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <h2>Ожидающие одобрения ({{ pending_announcements.count }})</h2>
+    
+    {% if pending_announcements %}
+        <div class="row">
+            {% for announcement in pending_announcements %}
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>{{ announcement.title }}</h5>
+                            <span class="badge badge-warning">Ожидает проверки</span>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Категория:</strong> {{ announcement.category.name }}</p>
+                            <p><strong>Цена:</strong> {{ announcement.price }} RUB</p>
+                            <p><strong>Пользователь:</strong> {{ announcement.user.username }}</p>
+                            <p><strong>Дата создания:</strong> {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
+                            <div class="mb-3">
+                                <strong>Описание:</strong>
+                                <p>{{ announcement.description|truncatewords:30 }}</p>
+                            </div>
+                            
+                            <div class="d-flex">
+                                <a href="{% url 'announcement_detail' pk=announcement.id %}" class="btn btn-info mr-2">
+                                    Просмотреть полностью
+                                </a>
+                                
+                                <form method="post" class="mr-2">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="announcement_id" value="{{ announcement.id }}">
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="btn btn-success">Одобрить</button>
+                                </form>
+                                
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="announcement_id" value="{{ announcement.id }}">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-danger">Отклонить</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            Нет объявлений, ожидающих проверки.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

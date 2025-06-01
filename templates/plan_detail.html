@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}{{ plan.name }} - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Хлебные крошки -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'plan_list' %}">Тарифы</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ plan.name }}</li>
+    </ol>
+  </nav>
+  
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- Информация о тарифе -->
+      <div class="card shadow-sm border-0 rounded-custom overflow-hidden mb-4">
+        <div class="card-header bg-primary text-white p-4">
+          <h1 class="fs-2 mb-0">{{ plan.get_name_display }}</h1>
+        </div>
+        <div class="card-body p-4">
+          <div class="row">
+            <div class="col-md-6 mb-4 mb-md-0">
+              <div class="d-flex align-items-center justify-content-center h-100">
+                <div class="text-center">
+                  <span class="d-block display-4 fw-bold">{{ plan.amount }}</span>
+                  <span class="text-muted">руб</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-4">
+                <h5 class="border-bottom pb-2 mb-3">Особенности тарифа</h5>
+                <ul class="list-unstyled">
+                  <li class="mb-2">
+                    <div class="d-flex">
+                      <div class="feature-icon bg-primary bg-opacity-10 rounded-circle p-2 me-3 text-primary">
+                        <i class="fas fa-chart-line"></i>
+                      </div>
+                      <div>
+                        <strong>Приоритет в поиске:</strong> {{ plan.priority }}
+                      </div>
+                    </div>
+                  </li>
+                  <li class="mb-2">
+                    <div class="d-flex">
+                      <div class="feature-icon bg-primary bg-opacity-10 rounded-circle p-2 me-3 text-primary">
+                        <i class="fas fa-eye"></i>
+                      </div>
+                      <div>
+                        <strong>Повышенная видимость</strong> в списке объявлений
+                      </div>
+                    </div>
+                  </li>
+                  <li class="mb-2">
+                    <div class="d-flex">
+                      <div class="feature-icon bg-primary bg-opacity-10 rounded-circle p-2 me-3 text-primary">
+                        <i class="fas fa-clock"></i>
+                      </div>
+                      <div>
+                        <strong>Длительность:</strong> 30 дней
+                      </div>
+                    </div>
+                  </li>
+                  {% if plan.name == 'top' %}
+                  <li class="mb-2">
+                    <div class="d-flex">
+                      <div class="feature-icon bg-primary bg-opacity-10 rounded-circle p-2 me-3 text-primary">
+                        <i class="fas fa-paint-brush"></i>
+                      </div>
+                      <div>
+                        <strong>Выделение цветом</strong> в общем списке
+                      </div>
+                    </div>
+                  </li>
+                  <li class="mb-2">
+                    <div class="d-flex">
+                      <div class="feature-icon bg-primary bg-opacity-10 rounded-circle p-2 me-3 text-primary">
+                        <i class="fas fa-share-alt"></i>
+                      </div>
+                      <div>
+                        <strong>Продвижение в социальных сетях</strong>
+                      </div>
+                    </div>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div class="border-top pt-4 mt-3">
+            <h5 class="mb-3">Описание тарифа</h5>
+            <p>{{ plan.description|default:"Тариф позволяет повысить видимость вашего объявления и выделить его среди других." }}</p>
+            
+            <p>С тарифом {{ plan.get_name_display }} ваше объявление будет показываться выше других объявлений в результатах поиска. Чем выше приоритет тарифа, тем выше ваше объявление будет находиться в списке результатов.</p>
+          </div>
+          
+          <div class="mt-4">
+            <a href="{% url 'announcement_create' %}?plan={{ plan.id }}" class="btn btn-primary">
+              <i class="fas fa-plus me-2"></i>Создать объявление с этим тарифом
+            </a>
+            <a href="{% url 'plan_list' %}" class="btn btn-outline-secondary ms-2">
+              <i class="fas fa-arrow-left me-2"></i>Вернуться к списку тарифов
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <!-- Сравнение с другими тарифами -->
+      <div class="card shadow-sm border-0 rounded-custom mb-4">
+        <div class="card-header bg-light p-3">
+          <h5 class="mb-0">Сравнение с другими тарифами</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">Функции</th>
+                  <th scope="col">Базовый</th>
+                  <th scope="col">Стандарт</th>
+                  <th scope="col">Топ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Приоритет</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>3</td>
+                </tr>
+                <tr>
+                  <td>Выделение цветом</td>
+                  <td><i class="fas fa-times text-muted"></i></td>
+                  <td><i class="fas fa-times text-muted"></i></td>
+                  <td><i class="fas fa-check text-success"></i></td>
+                </tr>
+                <tr>
+                  <td>Продвижение в соцсетях</td>
+                  <td><i class="fas fa-times text-muted"></i></td>
+                  <td><i class="fas fa-times text-muted"></i></td>
+                  <td><i class="fas fa-check text-success"></i></td>
+                </tr>
+                <tr>
+                  <td>Повышенная видимость</td>
+                  <td><i class="fas fa-times text-muted"></i></td>
+                  <td><i class="fas fa-check text-success"></i></td>
+                  <td><i class="fas fa-check text-success"></i></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Почему стоит выбрать платный тариф -->
+      <div class="card shadow-sm border-0 rounded-custom">
+        <div class="card-header bg-light p-3">
+          <h5 class="mb-0">Преимущества платных тарифов</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex align-items-center border-0 px-0">
+              <div class="me-3 text-primary fs-5">
+                <i class="fas fa-users"></i>
+              </div>
+              <div>
+                <strong>Больше просмотров</strong>
+                <p class="mb-0 small text-muted">Ваши объявления увидит больше потенциальных покупателей</p>
+              </div>
+            </li>
+            <li class="list-group-item d-flex align-items-center border-0 px-0">
+              <div class="me-3 text-primary fs-5">
+                <i class="fas fa-bolt"></i>
+              </div>
+              <div>
+                <strong>Быстрая продажа</strong>
+                <p class="mb-0 small text-muted">Товары с повышенной видимостью продаются на 70% быстрее</p>
+              </div>
+            </li>
+            <li class="list-group-item d-flex align-items-center border-0 px-0">
+              <div class="me-3 text-primary fs-5">
+                <i class="fas fa-comment-dollar"></i>
+              </div>
+              <div>
+                <strong>Выгодная цена</strong>
+                <p class="mb-0 small text-muted">Выделение объявления позволяет получить лучшую цену за ваш товар</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %} 
