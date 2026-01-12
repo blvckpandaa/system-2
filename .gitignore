@@ -1,4 +1,4 @@
-# virtual environments
+# venv
 venv/
 .venv/
 env/
@@ -8,6 +8,7 @@ __pycache__/
 *.py[cod]
 
 # django
+.env
 db.sqlite3
 media/
 staticfiles/
@@ -15,6 +16,5 @@ staticfiles/
 # logs
 *.log
 
-# system
-.env
-
+# ide
+.idea/
