@@ -37,8 +37,12 @@ import requests
 from dal import autocomplete
 from django.conf import settings
 
-from .utils.fkko_search import search_fkko
-from .utils.semantic_fkko import semantic_search_fkko
+from .utils.fkko_search import search_fkko, suggest_fkko, fkko_count
+try:
+    from .utils.semantic_fkko import semantic_search_fkko
+    _SEMANTIC_OK = True
+except Exception:
+    _SEMANTIC_OK = False
 
 Configuration.account_id = settings.YOOKASSA_SHOP_ID
 Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
@@ -893,24 +897,40 @@ def user_notifications_view(request):
     return render(request, 'notifications.html', context)
 
 class FkkoAutocomplete(autocomplete.Select2ListView):
-    """
-    Автодополнение из локального CSV с кодами ФККО.
-    """
     def get_list(self):
         term = self.q or ''
-        results = search_fkko(term)
+        # suggest_fkko уже сам использует SPECIAL_MAP (фантики),
+        # и при необходимости может внутри вызвать search_fkko.
+        results = suggest_fkko(term, limit=12)
+        if not results:
+            results = search_fkko(term, limit=12)
         return [f"{row['code']} — {row['name']}" for row in results]
+
+
 def fkko_suggestions(request):
     q = request.GET.get('q', '').strip()
+
+    # если csv не подхватился — вернём 503, чтобы сразу было видно причину
+    if fkko_count() == 0:
+        return JsonResponse(
+            {"error": "FKKO dataset is empty (CSV not loaded)"},
+            status=503
+        )
+
     if len(q) < 2:
-        from .utils.fkko_search import search_fkko
-        return JsonResponse(search_fkko(q, limit=10), safe=False)
+        return JsonResponse([], safe=False)
 
-    sem = semantic_search_fkko(q, top_k=10, threshold=0.45)
-    if sem:
-        return JsonResponse(sem, safe=False)
+    base = suggest_fkko(q, limit=12)
+    if base:
+        return JsonResponse(base, safe=False)
 
-    # fallback на простую подстроку
-    from .utils.fkko_search import search_fkko
-    return JsonResponse(search_fkko(q, limit=10), safe=False)
+    if _SEMANTIC_OK:
+        try:
+            sem = semantic_search_fkko(q, top_k=12, threshold=0.55)
+            if sem:
+                return JsonResponse(sem, safe=False)
+        except Exception:
+            pass
+
+    return JsonResponse(search_fkko(q, limit=12), safe=False)
 

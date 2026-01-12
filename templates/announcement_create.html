@@ -238,218 +238,197 @@
 </div>
 
 <script>
-  function showPreview(input) {
-    const previewContainer = document.getElementById('image-preview');
-    previewContainer.innerHTML = '';
-    
-    if (input.files && input.files.length > 0) {
-      for (let i = 0; i < Math.min(input.files.length, 10); i++) {
-        const file = input.files[i];
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-          const previewCard = document.createElement('div');
-          previewCard.className = 'image-preview-item position-relative';
-          previewCard.style.width = '100px';
-          previewCard.style.height = '100px';
-          
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          img.className = 'w-100 h-100 rounded-3 object-fit-cover';
-          
-          const removeBtn = document.createElement('button');
-          removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle p-0';
-          removeBtn.style.width = '24px';
-          removeBtn.style.height = '24px';
-          removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-          removeBtn.onclick = function(ev) {
-            ev.preventDefault();
-            previewCard.remove();
-          };
-          
-          previewCard.appendChild(img);
-          previewCard.appendChild(removeBtn);
-          previewContainer.appendChild(previewCard);
-        };
-        
-        reader.readAsDataURL(file);
-      }
+/* ---------- Превью изображений ---------- */
+function showPreview(input) {
+  const previewContainer = document.getElementById('image-preview');
+  previewContainer.innerHTML = '';
+
+  if (input.files && input.files.length > 0) {
+    for (let i = 0; i < Math.min(input.files.length, 10); i++) {
+      const file = input.files[i];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const previewCard = document.createElement('div');
+        previewCard.className = 'image-preview-item position-relative';
+        previewCard.style.width = '100px';
+        previewCard.style.height = '100px';
+
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.className = 'w-100 h-100 rounded-3 object-fit-cover';
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle p-0';
+        removeBtn.style.width = '24px';
+        removeBtn.style.height = '24px';
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.onclick = function(ev) { ev.preventDefault(); previewCard.remove(); };
+
+        previewCard.appendChild(img);
+        previewCard.appendChild(removeBtn);
+        previewContainer.appendChild(previewCard);
+      };
+
+      reader.readAsDataURL(file);
     }
   }
-  
-  // Форма проверки
-  (function() {
-    'use strict';
-    var forms = document.querySelectorAll('.needs-validation');
-    Array.prototype.slice.call(forms)
-      .forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-          if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-          }
-          form.classList.add('was-validated');
-        }, false);
-      });
-  })();
+}
 
-  // Вывод ошибок в консоль (для отладки)
-  document.querySelector('form').addEventListener('submit', function(e) {
-    console.log('Submitting form...');
-    // Не останавливаем отправку формы, просто логируем
+/* ---------- Валидация формы / анти-двойной клик ---------- */
+(function() {
+  'use strict';
+  var forms = document.querySelectorAll('.needs-validation');
+  Array.prototype.slice.call(forms).forEach(function(form) {
+    form.addEventListener('submit', function(event) {
+      if (!form.checkValidity()) { event.preventDefault(); event.stopPropagation(); }
+      form.classList.add('was-validated');
+    }, false);
   });
+})();
 
-  document.addEventListener('DOMContentLoaded', function() {
-    // Предотвращение многократной отправки формы
-    const form = document.querySelector('form');
-    const submitButton = document.getElementById('submitButton');
-    const spinner = document.getElementById('spinner');
-    
-    form.addEventListener('submit', function(e) {
-      // Проверяем, что форма ещё не была отправлена
-      if (submitButton.disabled) {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Отключаем кнопку и показываем индикатор загрузки
-      submitButton.disabled = true;
-      submitButton.classList.add('opacity-75');
-      spinner.classList.remove('d-none');
-      
-      // На всякий случай добавляем таймаут для разблокировки кнопки через 30 секунд,
-      // если что-то пойдет не так с отправкой формы
-      setTimeout(function() {
-        submitButton.disabled = false;
-        submitButton.classList.remove('opacity-75');
-        spinner.classList.add('d-none');
-      }, 30000);
-      
-      return true;
-    });
-    
-    // Предзагрузка изображений для быстрого отображения
-    const imageInputs = document.querySelectorAll('input[type="file"]');
-    imageInputs.forEach(input => {
-      input.addEventListener('change', function() {
-        // Здесь можно добавить предпросмотр изображений, если нужно
-      });
-    });
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const submitButton = document.getElementById('submitButton');
+  const spinner = document.getElementById('spinner');
+
+  form?.addEventListener('submit', function(e) {
+    if (submitButton?.disabled) { e.preventDefault(); return false; }
+    if (submitButton) { submitButton.disabled = true; submitButton.classList.add('opacity-75'); }
+    if (spinner) spinner.classList.remove('d-none');
+
+    setTimeout(function() {
+      if (submitButton) { submitButton.disabled = false; submitButton.classList.remove('opacity-75'); }
+      if (spinner) spinner.classList.add('d-none');
+    }, 30000);
+    return true;
   });
+});
 </script>
+
 <script>
+/* ================= FKKO: быстрые подсказки без «примеров» ================ */
 document.addEventListener('DOMContentLoaded', function(){
   const inp      = document.getElementById('fkko_input');
   const hidden   = document.getElementById('fkko_code_hidden');
   const list     = document.getElementById('fkko_list');
   const selected = document.getElementById('fkko_selected');
-  let   timer    = null;
-  let   codes    = [];
-  let   lastQ    = '';  // последний использованный поисковый запрос
 
-  // Стоп-слова, которые не пойдут в запрос
-  const stopwords = [
-    'продаю','продам','куплю','арендую','снимаю',
-    'ищу','предлагаю','отдам','продаём','продается',
-    'продаётся','продают'
-  ];
+  let timer = null;
+  let codes = [];
+  let lastQ = '';
+  let reqSeq = 0;
+  let activeCtrl = null;
+  const SUGGEST_URL = list?.dataset.api || "{% url 'fkko-suggestions' %}";
 
-  // Если уже есть сохранённые коды — отрисуем их чипами
-  if (hidden.value) {
-    codes = hidden.value.split(',')
-                        .map(s=>s.trim())
-                        .filter(Boolean);
+  const stopwords = ['продаю','продам','куплю','арендую','снимаю','ищу','предлагаю','отдам','продаём','продается','продаётся','продают'];
+
+  // восстановить выбранные коды
+  if (hidden?.value) {
+    codes = hidden.value.split(',').map(s=>s.trim()).filter(Boolean);
     renderChips();
   }
 
-  // При вводе — дебаунсим и запускаем fetchSuggestions
-  inp.addEventListener('input', function(){
+  function normalizeInput(val){
+    return val.trim().toLowerCase()
+      .replace(/ё/g,'е')
+      .split(/\s+/).filter(w=>w && !stopwords.includes(w)).join(' ');
+  }
+
+  // быстрый дебаунс
+  inp?.addEventListener('input', function(){
     clearTimeout(timer);
-    timer = setTimeout(() => {
-      const tokens = inp.value
-        .trim()
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(w => w && !stopwords.includes(w));
-      const q = tokens.join(' ');
-      if (q.length < 2) {
-        list.style.display = 'none';
-        return;
-      }
+    timer = setTimeout(()=>{
+      const q = normalizeInput(inp.value);
+      if (q === lastQ) return;
       lastQ = q;
+      if (!q || q.length < 2) { hideList(); return; }
       fetchSuggestions(q);
-    }, 300);
+    }, 120);
   });
 
-  // Делает AJAX, рисует только те подсказки, чьи коды ещё не выбраны
-  function fetchSuggestions(q) {
-    fetch("{% url 'fkko-suggestions' %}?q=" + encodeURIComponent(q))
-      .then(r => r.json())
-      .then(data => {
-        list.innerHTML = '';
-        data.forEach(item => {
-          if (!codes.includes(item.code)) {
+  async function fetchSuggestions(q){
+    if (!list) return;
+    if (activeCtrl) activeCtrl.abort();
+    activeCtrl = new AbortController();
+    const mySeq = ++reqSeq;
+
+    try{
+      const res = await fetch(`${SUGGEST_URL}?q=${encodeURIComponent(q)}`, { signal: activeCtrl.signal });
+      if (!res.ok) { hideList(); return; }
+      const data = await res.json();
+      if (mySeq < reqSeq) return; // устаревший ответ
+
+      list.innerHTML = '';
+      if (Array.isArray(data) && data.length){
+        for (const item of data){
+          if (!codes.includes(item.code)){
             const li = document.createElement('li');
             li.className = 'list-group-item list-group-item-action';
             li.textContent = `${item.code} — ${item.name}`;
             li.dataset.code = item.code;
             list.appendChild(li);
           }
-        });
+        }
         list.style.display = list.children.length ? 'block' : 'none';
-      })
-      .catch(console.error);
+      } else {
+        hideList();
+      }
+    } catch(e){
+      if (e.name !== 'AbortError') hideList();
+    }
   }
 
-  // При клике на подсказку — добавляем чип, обновляем скрытое поле
-  // и **снова** запрашиваем suggestions с тем же lastQ
-  list.addEventListener('click', function(e){
+  // выбор подсказки (mousedown — чтобы blur не спрятал список до клика)
+  list?.addEventListener('mousedown', function(e){
     const li = e.target.closest('li');
     if (!li) return;
     const code = li.dataset.code;
-    if (!codes.includes(code)) {
+    if (code && !codes.includes(code)){
       codes.push(code);
-      updateHidden();
-      renderChips();
+      updateHidden(); renderChips();
+      if (lastQ && lastQ.length >= 2) fetchSuggestions(lastQ);
     }
-    fetchSuggestions(lastQ);
   });
 
-  // Рендерим чипы выбранных кодов
-  function renderChips() {
+  function renderChips(){
+    if (!selected) return;
     selected.innerHTML = '';
-    codes.forEach(code => {
+    codes.forEach(code=>{
       const chip = document.createElement('div');
       chip.className = 'chip';
       chip.textContent = code;
       const rm = document.createElement('span');
       rm.className = 'remove';
       rm.textContent = '×';
-      rm.onclick = () => {
-        codes = codes.filter(c => c !== code);
-        updateHidden();
-        renderChips();
-        // после удаления чипа можно тоже перезапросить
-        if (lastQ.length >= 2) fetchSuggestions(lastQ);
+      rm.onclick = ()=>{
+        codes = codes.filter(c=>c!==code);
+        updateHidden(); renderChips();
+        if (lastQ && lastQ.length >= 2) fetchSuggestions(lastQ);
       };
       chip.appendChild(rm);
       selected.appendChild(chip);
     });
   }
 
-  // Обновляем значение скрытого поля
-  function updateHidden() {
-    hidden.value = codes.join(',');
-  }
+  function updateHidden(){ if (hidden) hidden.value = codes.join(','); }
+  function hideList(){ if (list) { list.innerHTML = ''; list.style.display='none'; } }
 
-  // Скрываем список, если клик вне поля/списка
+  // при фокусе — подгрузить, если в поле уже есть достаточный ввод
+  inp?.addEventListener('focus', function(){
+    const q = normalizeInput(inp.value);
+    if (q && q.length >= 2) fetchSuggestions(q);
+  });
+
+  // клик вне — скрыть список
   document.addEventListener('click', function(e){
-    if (!inp.contains(e.target) && !list.contains(e.target)) {
-      list.style.display = 'none';
+    if (!inp?.contains(e.target) && !list?.contains(e.target)) {
+      setTimeout(()=> hideList(), 100);
     }
   });
 });
 </script>
+
 
 
 {% endblock content %}

@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon/apple-touch-icon.png' %}">
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon/favicon-32x32.png' %}">
   <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon/favicon-16x16.png' %}">
-  <link rel="shortcut icon" href="{% static 'images/photo_2025-04-15_14-26-50.jpg' %}">
+  <link rel="shortcut icon" href="{% static 'images/Chistiy_Mir_logo_1.png' %}">
   <meta name="theme-color" content="#2E8B57">
   
   <!-- Google Fonts -->
@@ -733,16 +733,21 @@ background-size: 60%;
       <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
   <!-- Увеличили высоту до 64px -->
   <img
-    src="{% static 'images/photo_2025-04-15_14-26-50.jpg' %}"
+    src="{% static 'images/Chistiy_Mir_logo_1.png' %}"
     alt="Чистый Мир"
     height="64"
     class="me-2"
   >
   <div class="d-none d-sm-flex flex-column">
-    <!-- Добавили утилиту fs-6 для самого маленького размера шрифта в Bootstrap -->
-    <span class="fw-bold fs-6">Чистый Мир</span>
-    <span class="fw-bold fs-6">WINDEXS</span>
-  </div>
+    <img 
+        src="{% static 'images/windex.png' %}" 
+        alt="WINDEXS — Чистый Мир" 
+        height="60"
+        class="ms-1"
+        style="object-fit: contain;"
+    >
+</div>
+
 </a>
 
 

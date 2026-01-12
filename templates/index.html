@@ -492,9 +492,7 @@
             </div>
             <h5 class="card-title mb-3">{{ news_item.title }}</h5>
             <p class="card-text text-muted small mb-3">{{ news_item.content|truncatewords:25 }}</p>
-            <a href="{% url 'news_detail' news_item.id %}" class="btn btn-outline-primary btn-sm mt-auto align-self-start">
-              <i class="fas fa-angle-right me-1"></i>Читать далее
-            </a>
+            
           </div>
         </div>
       </div>
