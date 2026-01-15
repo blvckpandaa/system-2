@@ -22,3 +22,45 @@ staticfiles/
 # local db & logs
 db.sqlite3
 *.log
+
+# Python
+venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
+gunicorn*.log
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# Node
+node_modules/
+dist/
+
+# Python
+venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs
+*.log
+gunicorn*.log
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# Node
+node_modules/
+dist/
