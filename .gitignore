@@ -18,3 +18,7 @@ staticfiles/
 
 # ide
 .idea/
+
+# local db & logs
+db.sqlite3
+*.log
