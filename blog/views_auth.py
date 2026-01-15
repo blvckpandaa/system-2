@@ -1,4 +1,4 @@
-from datetime import timezone
+from django.utils import timezone
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -69,7 +69,20 @@ class BrandedPasswordResetView(PasswordResetView):
             user=user if user else None,
         )
 
-        return super().form_valid(form)
+        domain = "eccoprom.windexs.ru"
+
+        form.save(
+            domain_override=domain,
+            use_https=True,
+            request=None,  # чтобы не взял 192.168.*
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            subject_template_name=self.subject_template_name,
+            email_template_name=self.email_template_name,
+            html_email_template_name=self.html_email_template_name,
+            extra_email_context={"site_domain": domain, "year": timezone.now().year},
+        )
+
+        return HttpResponse("", status=302, headers={"Location": self.success_url})
 
     def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None):
         RESET_BASE_URL = "https://eccoprom.windexs.ru"
