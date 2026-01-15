@@ -7,10 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Чистый Мир{% endblock title %}</title>
   <link href="{% static 'autocomplete_light/vendor/select2/dist/css/select2.min.css' %}" rel="stylesheet"/>
-<link href="{% static 'autocomplete_light/select2.css' %}" rel="stylesheet"/>
+    <link href="{% static 'autocomplete_light/select2.css' %}" rel="stylesheet"/>
 
-
-  <!-- Favicon -->
   <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicon/apple-touch-icon.png' %}">
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon/favicon-32x32.png' %}">
   <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon/favicon-16x16.png' %}">
@@ -277,7 +275,7 @@ background-size: 60%;
     
     /* Секция героя */
     .hero-section {
-      background: linear-gradient(135deg, rgba(0, 77, 64, 0.7), rgba(0, 120, 100, 0.7));
+      background: linear-gradient(135deg, rgba(0, 77, 64, 0.30), rgba(0, 120, 100, 0.30));
       background-size: cover;
       background-position: center;
       height: 600px;
@@ -298,7 +296,7 @@ background-size: 60%;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(to right, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.06));
       z-index: 1;
     }
     
@@ -670,7 +668,7 @@ background-size: 60%;
     height: var(--btn-height-mobile);
     padding: 20px;
     font-size: 1rem;
-    line-height: var(--btn-height-mobile);
+    {#line-height: var(--btn-height-mobile);#}
     margin-bottom: var(--gutter-mobile);
   }
 
@@ -682,7 +680,7 @@ background-size: 60%;
     padding: 0.75rem;
     font-size: 1rem;
     line-height: 1.4;
-    margin-bottom: var(--gutter-mobile);
+
   }
   /* Для Select2 */
   .select2-container--default .select2-selection--single {
@@ -740,8 +738,8 @@ background-size: 60%;
   >
   <div class="d-none d-sm-flex flex-column">
     <img 
-        src="{% static 'images/windex.png' %}" 
-        alt="WINDEXS — Чистый Мир" 
+        src="{% static 'images/logo2.png' %}"
+
         height="60"
         class="ms-1"
         style="object-fit: contain;"
@@ -776,11 +774,7 @@ background-size: 60%;
               <i class="fas fa-newspaper"></i> Новости
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.path == '/donation/' %}active{% endif %} text-accent fw-bold" href="{% if user.is_authenticated %}{% url 'donation' %}{% else %}{% url 'login' %}?next={% url 'donation' %}{% endif %}">
-              <i class="fas fa-heart me-1"></i>Пожертвовать
-            </a>
-          </li>
+
           {% if user.is_authenticated %}
           <li class="nav-item">
             <a class="nav-link position-relative {% if 'chat_list' in request.path %}active{% endif %}" href="{% url 'chat_list' %}">
@@ -804,9 +798,7 @@ background-size: 60%;
                   <span class="badge bg-danger">{{ unread_messages_count }}</span>
                 {% endif %}
               </a></li>
-              <li><a class="dropdown-item" href="{% url 'donation_list' %}">
-                <i class="fas fa-donate me-2"></i>Мои пожертвования
-              </a></li>
+
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Выход</a></li>
             </ul>
@@ -884,10 +876,8 @@ background-size: 60%;
           <h5 class="footer-title">О проекте</h5>
           <p>Чистый Мир - платформа для экологичных объявлений. Наша миссия - продвигать устойчивое потребление и помогать людям обмениваться экологичными товарами.</p>
           <div class="social-icons mt-3">
-            <a href="#"><i class="fab fa-facebook-f"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-telegram"></i></a>
+
+            <a href="https://t.me/WindexsGroup"><i class="fab fa-telegram"></i></a>
           </div>
         </div>
         
@@ -916,9 +906,9 @@ background-size: 60%;
         <div class="col-lg-4 col-md-4">
           <h5 class="footer-title">Контакты</h5>
           <ul class="footer-links">
-            <li><i class="fas fa-envelope me-2"></i>info@cleanworld.ru</li>
-            <li><i class="fas fa-phone me-2"></i>+7 (999) 123-45-67</li>
-            <li><i class="fas fa-map-marker-alt me-2"></i>г. Москва, ул. Экологическая, 42</li>
+            <li><i class="fas fa-envelope me-2"></i>nex.gen@internet.ru</li>
+            <li><i class="fas fa-phone me-2"></i>+7 (495) 761-74-74</li>
+            <li><i class="fas fa-map-marker-alt me-2"></i>г. Москва, ул Бутлерова, д. 17б, офис 607, помещение 33/6</li>
           </ul>
         </div>
       </div>

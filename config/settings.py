@@ -164,7 +164,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"      # /home/ser/system-2/static
+STATIC_ROOT = BASE_DIR / "staticfiles"   # для collectstatic
+
+
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -173,6 +175,15 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SITE_DOMAIN = os.environ.get("SITE_DOMAIN", "eccoprom.windexs.ru")
+SITE_PROTOCOL = os.environ.get("SITE_PROTOCOL", "https")
+PASSWORD_RESET_TIMEOUT = 30 * 60  # 30 минут
+
+# лимиты
+RESET_LIMIT_PER_IP = 5          # 5 попыток
+RESET_LIMIT_PER_EMAIL = 3       # 3 попытки
+RESET_LIMIT_WINDOW = 15 * 60
 
 try:
     from .settings_dev import *

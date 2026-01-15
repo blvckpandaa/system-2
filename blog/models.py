@@ -325,3 +325,26 @@ class Notification(models.Model):
         ordering = ['-created_at']
         verbose_name = "Уведомление"
         verbose_name_plural = "Уведомления"
+
+
+class PasswordResetAttempt(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    email = models.EmailField()
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True, default="")
+    success = models.BooleanField(default=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["email"]),
+            models.Index(fields=["ip"]),
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.email} {self.ip} success={self.success}"

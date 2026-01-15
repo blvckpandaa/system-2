@@ -110,7 +110,7 @@
   
   .category-img {
     width: 100%;
-    height: 100%;
+
     object-fit: cover;
     transition: transform 0.5s ease;
   }
@@ -153,6 +153,7 @@
   
   .category-name {
     margin: 0;
+      padding-left: 10px;
     font-weight: 700;
     font-size: 1.1rem;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
@@ -261,7 +262,76 @@
     .category-card {
       height: 140px;
     }
-    
+
+    /* ===== Карточка категорий как на 2 фото (картинка сверху + название снизу) ===== */
+.category-card--v2{
+  height: auto;                /* убираем фиксированную высоту */
+  border-radius: var(--border-radius-lg);
+  background: #fff;
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+}
+
+.category-card--v2:hover{
+  transform: translateY(-6px);
+  box-shadow: var(--box-shadow-hover);
+}
+
+/* верхняя часть с изображением */
+.category-card--v2 .category-media{
+  height: 170px;               /* подстрой под макет */
+  background: #f3f5f7;
+  overflow: hidden;
+}
+
+.category-card--v2 .category-img{
+  width: 100%;
+
+  object-fit: cover;
+  transform: none !important;  /* отключаем увеличение на hover если надо */
+}
+
+.category-card--v2:hover .category-img{
+  transform: none !important;  /* без zoom, как на 2 фото */
+}
+
+/* нижняя белая часть */
+.category-card--v2 .category-body{
+  padding: 14px 14px 16px;
+  text-align: center;
+}
+
+/* название по центру */
+.category-card--v2 .category-name{
+  margin: 0;
+  color: var(--text-dark);
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-shadow: none;
+}
+
+/* убираем старый overlay-эффект */
+.category-card--v2 .category-overlay{
+  display: none !important;
+}
+
+/* количество — внизу, не перекрывает картинку */
+.category-card--v2 .category-count{
+  margin-top: 10px;
+  opacity: 1;
+  transform: none;
+}
+
+/* бейдж — можно чуть спокойнее */
+.category-card--v2 .badge-accent{
+  box-shadow: none;
+}
+
+/* адаптив */
+@media (max-width: 767.98px){
+  .category-card--v2 .category-media{ height: 140px; }
+}
+
     .category-placeholder::before {
       font-size: 2.5rem;
     }
@@ -323,21 +393,27 @@
   {% for cat in cats %}
   <div class="col-6 col-sm-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|mul:50 }}">
     <a href="{% url 'category_detail' cat.id %}" class="text-decoration-none">
-      <div class="category-card">
-        {% if cat.image %}
-          <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="category-img">
-        {% else %}
-          <div class="category-placeholder"></div>
-        {% endif %}
-        <div class="category-overlay">
-          <h4 class="category-name">{{ cat.name }}</h4>
-          <div class="category-count">
-            <span class="badge rounded-pill badge-accent">
-              {{ cat.announcements.count }} объявл.
-            </span>
-          </div>
-        </div>
-      </div>
+      <div class="category-card category-card--v2">
+  <div class="category-media">
+    {% if cat.image %}
+      <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="category-img">
+    {% else %}
+      <div class="category-placeholder"></div>
+    {% endif %}
+  </div>
+
+  <div class="category-body">
+    <h4 class="category-name">{{ cat.name }}</h4>
+
+    {# если хочешь показывать количество — оставь, если нет, удали этот блок #}
+    <div class="category-count">
+      <span class="badge rounded-pill badge-accent">
+        {{ cat.announcements.count }} объявл.
+      </span>
+    </div>
+  </div>
+</div>
+
     </a>
   </div>
   {% endfor %}

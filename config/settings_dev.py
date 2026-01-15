@@ -13,14 +13,19 @@ DATABASES = {
     }
 }
 
-# Boshqa sozlamalar (EMAIL, TOKEN, va hokazo) ham shu faylda turishi mumkin
-SMS_CODE_ACTIVE = False
-ESKIZ_TOKEN = ''
-MAPS_API_KEY = ''
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-EMAIL_HOST = 'smtp.sendgrid.net'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'apikey'
-EMAIL_HOST_PASSWORD = ''
-SERVER_EMAIL = EMAIL_HOST_USER
-DEFAULT_FROM_EMAIL = ''
+EMAIL_HOST = "smtp.mail.ru"
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_USE_TLS = False
+
+EMAIL_HOST_USER = "eccoprom@besttrafik.ru"
+EMAIL_HOST_PASSWORD = "FC65e24q2kAFRXFfd8Q8"
+
+DEFAULT_FROM_EMAIL = "Ecco Prom <eccoprom@besttrafik.ru>"
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+# для ссылок в письмах
+SITE_DOMAIN = "eccoprom.windexs.ru"
+SITE_PROTOCOL = "https"

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ news_item.title }} - Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container py-5">
+
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h2 class="text-primary fw-bold mb-0">{{ news_item.title }}</h2>
+    <a href="{% url 'news_list' %}" class="btn btn-outline-primary rounded-pill">
+      <i class="fas fa-arrow-left me-2"></i>Все новости
+    </a>
+  </div>
+
+  <div class="text-muted small mb-3 d-flex gap-3 flex-wrap">
+    <span><i class="far fa-calendar-alt me-1"></i>{{ news_item.created_at|date:"d.m.Y" }}</span>
+    <span><i class="far fa-eye me-1"></i>{{ news_item.views }}</span>
+  </div>
+
+  {% if news_item.image %}
+    <div class="mb-4">
+      <img src="{{ news_item.image.url }}" class="img-fluid rounded-4 shadow-sm" alt="{{ news_item.title }}">
+    </div>
+  {% endif %}
+
+  <div class="card shadow-sm rounded-4 border-0">
+    <div class="card-body p-4">
+      <div class="content">
+        {{ news_item.content|linebreaks }}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock content %}

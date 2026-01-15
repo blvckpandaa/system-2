@@ -35,42 +35,6 @@
                 Пожалуйста, введите заголовок объявления.
               </div>
             </div>
-          <div class="mb-4 position-relative">
-  <label class="form-label fw-bold">
-    <i class="fas fa-barcode me-2"></i>Коды ФККО
-  </label>
-
-  <!-- Контейнер для чипов -->
-  <div id="fkko_selected" class="mb-2 d-flex flex-wrap gap-2"></div>
-
-  <!-- Поле ввода -->
-  <input
-    type="text"
-    id="fkko_input"
-    class="form-control"
-    placeholder="Начните вводить код или название…"
-    autocomplete="off"
-  >
-
-  <!-- Скрытое поле -->
-  <input type="hidden" name="fkko_code" id="fkko_code_hidden"
-         value="{{ form.instance.fkko_code|default:'' }}">
-
-  <!-- Выпадающий список -->
-  <ul id="fkko_list" class="list-group position-absolute w-100"
-      style="z-index:1000; display:none; max-height:250px; overflow-y:auto;">
-    {% if results %}
-      {% for item in results %}
-        <li class="list-group-item list-group-item-action"
-            data-code="{{ item.code }}" data-name="{{ item.name }}">
-          <strong>{{ item.code }}</strong>: {{ item.name }}
-        </li>
-      {% endfor %}
-    {% elif query %}
-      <li class="list-group-item text-muted">Ничего не найдено</li>
-    {% endif %}
-  </ul>
-</div>
             
             <div class="mb-4">
               <label for="id_category" class="form-label fw-bold">
@@ -141,7 +105,42 @@
 {#  </div>#}
 {#</div>#}
 
+           <div class="mb-4 position-relative">
+  <label class="form-label fw-bold">
+    <i class="fas fa-barcode me-2"></i>Коды ФККО
+  </label>
 
+  <!-- Контейнер для чипов -->
+  <div id="fkko_selected" class="mb-2 d-flex flex-wrap gap-2"></div>
+
+  <!-- Поле ввода -->
+  <input
+    type="text"
+    id="fkko_input"
+    class="form-control"
+    placeholder="Начните вводить код или название…"
+    autocomplete="off"
+  >
+
+  <!-- Скрытое поле -->
+  <input type="hidden" name="fkko_code" id="fkko_code_hidden"
+         value="{{ form.instance.fkko_code|default:'' }}">
+
+  <!-- Выпадающий список -->
+  <ul id="fkko_list" class="list-group position-absolute w-100"
+      style="z-index:1000; display:none; max-height:250px; overflow-y:auto;">
+    {% if results %}
+      {% for item in results %}
+        <li class="list-group-item list-group-item-action"
+            data-code="{{ item.code }}" data-name="{{ item.name }}">
+          <strong>{{ item.code }}</strong>: {{ item.name }}
+        </li>
+      {% endfor %}
+    {% elif query %}
+      <li class="list-group-item text-muted">Ничего не найдено</li>
+    {% endif %}
+  </ul>
+</div>
 
             
             <div class="mb-4">

@@ -12,7 +12,7 @@ from .models import (
     User,
     UserProfile, Banner, Plan, AnalyticsDummy,
     Category, Announcement, AnnouncementImage, GalleryImage,
-    Payment, Favorite, Comment, News, Chat, Message, OtherAnnouncement, Donation, Notification
+    Payment, Favorite, Comment, News, Chat, Message, OtherAnnouncement, Donation, Notification, PasswordResetAttempt
 )
 
 
@@ -249,6 +249,12 @@ class MyAdminSite(admin.AdminSite):
             monthly_payments=monthly_payments,
         )
         return render(request, 'admin/my_custom_analytics.html', context)
+
+@admin.register(PasswordResetAttempt)
+class PasswordResetAttemptAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "email", "ip", "success", "user")
+    search_fields = ("email", "ip", "user_agent")
+    list_filter = ("success", "created_at")
     
 custom_admin_site = MyAdminSite(name='myadmin')
 
