@@ -181,6 +181,48 @@
   overflow: hidden;
 }
 
+/* ===== Сетка категорий ===== */
+.category-grid{
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 22px;
+}
+
+/* ноутбуки */
+@media (max-width: 1400px){
+  .category-grid{
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* планшеты */
+@media (max-width: 1200px){
+  .category-grid{
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px){
+  .category-grid{
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* телефоны */
+@media (max-width: 576px){
+  .category-grid{
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+}
+
+  .category-img{
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
 .category-pill{
   flex: 0 0 auto;
   padding: 6px 10px;
@@ -327,14 +369,16 @@
 </div>
 
 {% if cats %}
-<div class="row g-3 g-md-4">
+<div class="category-grid">
   {% for cat in cats %}
-  <div class="col-6 col-sm-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|mul:50 }}">
-    <a href="{% url 'category_detail' cat.id %}" class="text-decoration-none category-link">
+    <a href="{% url 'category_detail' cat.id %}" class="category-link">
       <div class="category-card category-card--v2">
         <div class="category-media">
           {% if cat.image %}
-            <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="category-img" loading="lazy">
+            <img src="{{ cat.image.url }}"
+                 alt="{{ cat.name }}"
+                 class="category-img"
+                 loading="lazy">
           {% else %}
             <div class="category-placeholder"></div>
           {% endif %}
@@ -346,10 +390,9 @@
         </div>
       </div>
     </a>
-  </div>
-{% endfor %}
-
+  {% endfor %}
 </div>
+
 {% else %}
 <div class="empty-categories" data-aos="fade-up">
   <i class="fas fa-folder-open empty-categories-icon"></i>
