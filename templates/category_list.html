@@ -98,129 +98,18 @@
   display: block;
 }
 
-.category-card--v2{
-  height: 100%;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.88);
-  border: 1px solid rgba(255,255,255,0.55);
-  overflow: hidden;
-  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.10);
-  transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
-  backdrop-filter: blur(10px);
-}
-
-.category-card--v2:hover{
-  transform: translateY(-4px);
-  background: rgba(255,255,255,0.96);
-  box-shadow: 0 18px 44px rgba(16, 24, 40, 0.16);
-}
-
-.category-card--v2 .category-media{
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10; /* одинаковая высота картинок */
-  background: linear-gradient(135deg, #f4f7f5, #e9f1ec);
-  overflow: hidden;
-}
-
-.category-card--v2 .category-img{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transform: scale(1.02);
-  transition: transform .35s ease;
-}
-
-.category-card--v2:hover .category-img{
-  transform: scale(1.08);
-}
-
-/* легкая затемнялка снизу для “дорогого” вида */
-.category-card--v2 .category-media::after{
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0) 55%, rgba(0,0,0,0.25) 100%);
-  pointer-events: none;
-}
-
-.category-card--v2 .category-placeholder{
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, #f4f7f5, #e9f1ec);
-}
-.category-card--v2 .category-placeholder::before{
-  content: "\f07c";
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  font-size: 2.6rem;
-  color: rgba(46, 139, 87, 0.35);
-}
-
-.category-card--v2 .category-body{
-  padding: 14px 14px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.category-card--v2 .category-name{
-  margin: 0;
-  font-weight: 800;
-  font-size: 1.02rem;
-  color: var(--text-dark, #111827);
-  line-height: 1.2;
-
-  display: -webkit-box;
-  -webkit-line-clamp: 2;           /* максимум 2 строки */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ===== Сетка категорий ===== */
 
 
 
 
 
-/* планшеты */
 
 
 
 
-/* телефоны */
-/* ===== Авто-сетка: сколько влезет — столько и будет ===== */
-/* ===== Авто-сетка: много карточек в ряд, но НЕ огромные ===== */
-.category-grid{
-  display: grid;
-  gap: 18px;
 
-  /* ключ: карточка 160–220px, дальше не растягивается */
-  grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
 
-  /* чтобы сетка не растягивала карточки на всю ширину */
-  justify-content: start;
-}
 
-/* чуть больше на больших экранах, но тоже с лимитом */
-@media (min-width: 1200px){
-  .category-grid{
-    grid-template-columns: repeat(auto-fit, minmax(170px, 230px));
-    gap: 22px;
-  }
-}
-
-/* маленькие экраны */
-@media (max-width: 576px){
-  .category-grid{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-  }
-}
 
 
 
@@ -344,6 +233,41 @@
       text-align: center;
     }
     
+/* Как на главной: ровные карточки и одинаковые картинки */
+.category-card--home{
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(16,24,40,0.10);
+  border: 1px solid rgba(0,0,0,0.06);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.category-card--home:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 18px 44px rgba(16,24,40,0.16);
+}
+
+.category-img-wrap{
+  height: 120px;            /* вот это делает “не огромным” */
+}
+
+@media (min-width: 768px){
+  .category-img-wrap{ height: 135px; }
+}
+@media (min-width: 1200px){
+  .category-img-wrap{ height: 140px; }
+}
+
+.category-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform .45s ease;
+}
+.category-card--home:hover .category-img{
+  transform: scale(1.06);
+}
 
 
 
@@ -381,37 +305,32 @@
 </div>
 
 {% if cats %}
-<div class="category-grid">
+<div class="row g-3 g-md-4">
   {% for cat in cats %}
-    <a href="{% url 'category_detail' cat.id %}" class="category-link">
-      <div class="category-card category-card--v2">
-        <div class="category-media">
+    <div class="col-6 col-sm-4 col-md-3 col-lg-2" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0|mul:50 }}">
+      <a href="{% url 'category_detail' cat.id %}" class="text-decoration-none">
+        <div class="card category-card text-center h-100 category-card--home">
           {% if cat.image %}
-            <img src="{{ cat.image.url }}"
-                 alt="{{ cat.name }}"
-                 class="category-img"
-                 loading="lazy">
+            <div class="overflow-hidden category-img-wrap">
+              <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="category-img transition-transform" loading="lazy">
+            </div>
           {% else %}
-            <div class="category-placeholder"></div>
+            <div class="d-flex align-items-center justify-content-center bg-light overflow-hidden category-img-wrap">
+              <div class="category-icon transition-transform">
+                <i class="fas fa-recycle fa-2x text-primary"></i>
+              </div>
+            </div>
           {% endif %}
+          <div class="card-body p-2 p-md-3">
+            <h5 class="card-title mb-0 fs-6">{{ cat.name }}</h5>
+          </div>
         </div>
-
-        <div class="category-body">
-          <h4 class="category-name">{{ cat.name }}</h4>
-          <span class="category-pill">Открыть</span>
-        </div>
-      </div>
-    </a>
+      </a>
+    </div>
   {% endfor %}
 </div>
-
-{% else %}
-<div class="empty-categories" data-aos="fade-up">
-  <i class="fas fa-folder-open empty-categories-icon"></i>
-  <h3 class="mb-3">Категории пока не добавлены</h3>
-  <p class="text-muted mb-4">Попробуйте зайти позже или обратитесь к администратору</p>
-</div>
 {% endif %}
+
 
 {% endblock content %}
 
