@@ -182,46 +182,47 @@
 }
 
 /* ===== Сетка категорий ===== */
-.category-grid{
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 22px;
-}
 
-/* ноутбуки */
-@media (max-width: 1400px){
-  .category-grid{
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
+
+
+
 
 /* планшеты */
-@media (max-width: 1200px){
-  .category-grid{
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
 
-@media (max-width: 992px){
-  .category-grid{
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
+
+
 
 /* телефоны */
+/* ===== Авто-сетка: сколько влезет — столько и будет ===== */
+/* ===== Авто-сетка: много карточек в ряд, но НЕ огромные ===== */
+.category-grid{
+  display: grid;
+  gap: 18px;
+
+  /* ключ: карточка 160–220px, дальше не растягивается */
+  grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
+
+  /* чтобы сетка не растягивала карточки на всю ширину */
+  justify-content: start;
+}
+
+/* чуть больше на больших экранах, но тоже с лимитом */
+@media (min-width: 1200px){
+  .category-grid{
+    grid-template-columns: repeat(auto-fit, minmax(170px, 230px));
+    gap: 22px;
+  }
+}
+
+/* маленькие экраны */
 @media (max-width: 576px){
   .category-grid{
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
   }
 }
 
-  .category-img{
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-}
+
 
 .category-pill{
   flex: 0 0 auto;
@@ -240,6 +241,17 @@
   outline-offset: 3px;
 }
 
+.category-card--v2 .category-media{
+  aspect-ratio: 4 / 3;   /* выглядит лучше для категорий */
+}
+
+.category-card--v2 .category-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  image-rendering: auto;
+}
 
 
 
