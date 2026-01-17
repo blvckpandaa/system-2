@@ -635,8 +635,11 @@ def global_search_view(request):
 
 
 def news_list_view(request):
-    news = News.objects.all().order_by('-created_at')
-    return render(request, 'news_list.html', {'news': news})
+    qs = News.objects.all().order_by("-created_at")
+    paginator = Paginator(qs, 9)  # 9 карточек на страницу (3x3)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, "news_list.html", {"news": page_obj})
 
 
 @login_required

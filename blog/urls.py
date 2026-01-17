@@ -47,6 +47,7 @@ urlpatterns = [
     # News
     path('news/', views.news_list_view, name='news_list'),
 
+
     # Chat
     path('chat/create/', views.chat_create_or_get_view, name='chat_create'),
     path('chat/<int:chat_id>/', views.chat_detail_view, name='chat_detail'),
