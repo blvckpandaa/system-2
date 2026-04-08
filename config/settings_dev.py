@@ -15,15 +15,15 @@ DATABASES = {
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-EMAIL_HOST = "smtp.mail.ru"
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "mail.windexs.ru")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "13091"))
 EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
 
-EMAIL_HOST_USER = "eccoprom@besttrafik.ru"
-EMAIL_HOST_PASSWORD = "FC65e24q2kAFRXFfd8Q8"
+EMAIL_HOST_USER = "eccoprom@windexs.ru"
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 
-DEFAULT_FROM_EMAIL = "Ecco Prom <eccoprom@besttrafik.ru>"
+DEFAULT_FROM_EMAIL = "Ecco Prom <eccoprom@windexs.ru>"
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 # для ссылок в письмах
