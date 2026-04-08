@@ -15,10 +15,24 @@ DATABASES = {
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
+
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
+
+
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "mail.windexs.ru")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "13091"))
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
+# Порт 13091 у многих хостеров — STARTTLS (plain + starttls), не SMTPS как на 465.
+# Если не коннектится: в .env попробуйте EMAIL_USE_SSL=1 и EMAIL_USE_TLS=0 (implicit SSL).
+if _env_bool("EMAIL_USE_SSL", False):
+    EMAIL_USE_SSL = True
+    EMAIL_USE_TLS = False
+else:
+    EMAIL_USE_TLS = _env_bool("EMAIL_USE_TLS", True)
+    EMAIL_USE_SSL = False
 
 EMAIL_HOST_USER = "eccoprom@windexs.ru"
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")

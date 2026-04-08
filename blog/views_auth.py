@@ -4,16 +4,12 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import PasswordResetView
 from django.core.cache import cache
-from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponse
-from django.template.loader import render_to_string
-from urllib.parse import urljoin
-from django.urls import reverse
 
+from .forms import BrandedPasswordResetForm
 from .models import PasswordResetAttempt
 
 User = get_user_model()
-RESET_BASE_URL = "https://eccoprom.windexs.ru"
 
 def get_client_ip(request):
     xff = request.META.get("HTTP_X_FORWARDED_FOR")
@@ -23,6 +19,7 @@ def get_client_ip(request):
 
 
 class BrandedPasswordResetView(PasswordResetView):
+    form_class = BrandedPasswordResetForm
     template_name = "auth/password_reset_form.html"
     success_url = "/password-reset/done/"
 
@@ -83,22 +80,3 @@ class BrandedPasswordResetView(PasswordResetView):
         )
 
         return HttpResponse("", status=302, headers={"Location": self.success_url})
-
-    def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email, html_email_template_name=None):
-        RESET_BASE_URL = "https://eccoprom.windexs.ru"
-
-        path = reverse("password_reset_confirm", kwargs={"uidb64": context["uid"], "token": context["token"]})
-        reset_url = urljoin(RESET_BASE_URL.rstrip("/") + "/", path.lstrip("/"))
-
-        subject = render_to_string(subject_template_name, context).strip()
-
-        # ВАЖНО: передаём reset_url в контекст писем
-        mail_ctx = {**context, "reset_url": reset_url, "site_domain": "eccoprom.windexs.ru"}
-
-        text_body = render_to_string(email_template_name, mail_ctx)
-        html_body = render_to_string("emails/password_reset.html", {**mail_ctx, "year": timezone.now().year})
-
-        from django.core.mail import EmailMultiAlternatives
-        msg = EmailMultiAlternatives(subject, text_body, from_email, [to_email])
-        msg.attach_alternative(html_body, "text/html")
-        msg.send()
