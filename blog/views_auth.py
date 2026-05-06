@@ -66,11 +66,12 @@ class BrandedPasswordResetView(PasswordResetView):
             user=user if user else None,
         )
 
-        domain = "eccoprom.windexs.ru"
+        domain = getattr(settings, "SITE_DOMAIN", "eccoprom.windexs.ru")
+        use_https = getattr(settings, "SITE_PROTOCOL", "https").lower() == "https"
 
         form.save(
             domain_override=domain,
-            use_https=True,
+            use_https=use_https,
             request=None,  # чтобы не взял 192.168.*
             from_email=settings.DEFAULT_FROM_EMAIL,
             subject_template_name=self.subject_template_name,
