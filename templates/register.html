@@ -3,11 +3,23 @@
 {% load custom_filters %}
 {% block title %}Регистрация - Чистый Мир{% endblock title %}
 
+{% block extra_css %}
+<link href="{% static 'css/form-loading.css' %}" rel="stylesheet">
+{% endblock extra_css %}
+
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-lg-6 col-md-8">
-      <div class="card shadow-lg border-0 rounded-custom p-4 p-md-5 position-relative overflow-hidden" data-aos="fade-up">
+      <div class="card shadow-lg border-0 rounded-custom p-4 p-md-5 position-relative overflow-hidden" data-aos="fade-up" data-form-wrap>
+        <div class="form-loading-overlay d-none" aria-live="polite" aria-busy="false">
+          <div class="form-loading-panel">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+              <span class="visually-hidden">Загрузка...</span>
+            </div>
+            <p class="form-loading-message">Регистрация...</p>
+          </div>
+        </div>
         <div class="position-absolute bg-primary opacity-10 rounded-circle" style="width: 300px; height: 300px; top: -120px; right: -120px;"></div>
         <div class="position-absolute bg-accent opacity-10 rounded-circle" style="width: 200px; height: 200px; bottom: -80px; left: -100px;"></div>
         
@@ -17,7 +29,7 @@
           <p class="text-muted">Создайте аккаунт и начните делать мир чище</p>
         </div>
         
-        <form method="POST" class="position-relative">
+        <form method="POST" class="position-relative" data-loading-form data-loading-message="Регистрация...">
           {% csrf_token %}
           {% if next %}
           <input type="hidden" name="next" value="{{ next }}">
@@ -101,7 +113,7 @@
             </label>
           </div>
 
-          <button class="btn btn-primary w-100 py-3 position-relative overflow-hidden" type="submit">
+          <button class="btn btn-primary w-100 py-3 position-relative overflow-hidden" type="submit" id="registerSubmitBtn">
             <span class="position-relative d-block">
               <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
             </span>
@@ -144,14 +156,20 @@
     });
     
     // Эффект при наведении на кнопку
-    const submitButton = document.querySelector('button[type="submit"]');
-    submitButton.addEventListener('mouseenter', function() {
-      this.querySelector('.position-absolute').style.transform = 'translateY(0)';
-    });
-    
-    submitButton.addEventListener('mouseleave', function() {
-      this.querySelector('.position-absolute').style.transform = 'translateY(-100%)';
-    });
+    const submitButton = document.getElementById('registerSubmitBtn');
+    if (submitButton) {
+      const hoverFx = submitButton.querySelector('.position-absolute');
+      submitButton.addEventListener('mouseenter', function() {
+        if (hoverFx) hoverFx.style.transform = 'translateY(0)';
+      });
+      submitButton.addEventListener('mouseleave', function() {
+        if (hoverFx) hoverFx.style.transform = 'translateY(-100%)';
+      });
+    }
   });
 </script>
 {% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/form-submit-loading.js' %}"></script>
+{% endblock extra_js %}
