@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
+from django.core.exceptions import ValidationError
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -15,6 +16,43 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ("username", "email", "password1", "password2")
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_active = False
+        if commit:
+            user.save()
+        return user
+
+
+class EmailVerificationForm(forms.Form):
+    code = forms.CharField(
+        label="Код из письма",
+        min_length=6,
+        max_length=6,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control text-center fs-4 letter-spacing",
+                "placeholder": "000000",
+                "inputmode": "numeric",
+                "autocomplete": "one-time-code",
+                "maxlength": "6",
+            }
+        ),
+    )
+
+    def clean_code(self):
+        code = (self.cleaned_data.get("code") or "").strip()
+        if not code.isdigit() or len(code) != 6:
+            raise ValidationError("Введите 6 цифр из письма.")
+        return code
+
+
+class ResendVerificationForm(forms.Form):
+    email = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(attrs={"class": "form-control", "placeholder": "example@gmail.com"}),
+    )
 
 
 class BrandedPasswordResetForm(PasswordResetForm):
@@ -63,7 +101,8 @@ class LoginForm(AuthenticationForm):
     error_messages = {
         'invalid_login': 'Пожалуйста, введите правильное имя пользователя и пароль. '
                          'Учтите, что оба поля могут быть чувствительны к регистру.',
-        'inactive': 'Этот аккаунт неактивен.',
+        'inactive': 'Подтвердите email — на почту был отправлен 6-значный код. '
+                    'Если письма нет, запросите код повторно на странице подтверждения.',
     }
 
 

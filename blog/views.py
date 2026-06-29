@@ -1,4 +1,5 @@
 import re
+import logging
 
 from bs4 import BeautifulSoup
 from django.shortcuts import render, redirect, get_object_or_404
@@ -24,6 +25,9 @@ from .models import (
 from .forms import (
     RegisterForm, LoginForm, AnnouncementForm, CommentForm
 )
+from .email_utils import issue_verification_code
+from .views_registration import SESSION_PENDING_USER_KEY
+from smtplib import SMTPAuthenticationError, SMTPException
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -46,6 +50,8 @@ except Exception:
 
 Configuration.account_id = settings.YOOKASSA_SHOP_ID
 Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
+
+logger = logging.getLogger(__name__)
 
 def pending_announcements_processor(request):
     """Context processor to add pending announcements count for admin users"""
@@ -84,8 +90,23 @@ def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()  
-            return redirect('login')
+            user = form.save()
+            try:
+                issue_verification_code(user)
+            except (SMTPAuthenticationError, SMTPException, OSError) as exc:
+                logger.exception("Registration verification email failed: %s", exc)
+                user.delete()
+                messages.error(
+                    request,
+                    "Не удалось отправить код на email. Проверьте адрес и попробуйте снова.",
+                )
+                return render(request, 'register.html', {'form': form})
+            request.session[SESSION_PENDING_USER_KEY] = user.pk
+            messages.success(
+                request,
+                f"На {user.email} отправлен 6-значный код. Введите его для завершения регистрации.",
+            )
+            return redirect('verify_email')
         else:
             return render(request, 'register.html', {'form': form})
     else:

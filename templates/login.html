@@ -96,6 +96,10 @@
         </div> -->
 
         <div class="text-center mt-2">
+          <p class="mb-2 small">
+            Не пришёл код при регистрации?
+            <a href="{% url 'resend_verification' %}" class="text-primary text-decoration-none">Отправить снова</a>
+          </p>
           <p class="mb-0">
             Нет аккаунта?
             <a href="{% url 'register' %}" class="text-primary fw-bold text-decoration-none">Зарегистрироваться</a>

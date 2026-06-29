@@ -1,6 +1,7 @@
 # myapp/urls.py
 from django.urls import path
 from . import views
+from . import views_registration
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -9,6 +10,8 @@ from .views import *
 urlpatterns = [
     path('', views.index_view, name='index'),
     path('register/', views.register_view, name='register'),
+    path('verify-email/', views_registration.verify_email_view, name='verify_email'),
+    path('verify-email/resend/', views_registration.resend_verification_view, name='resend_verification'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.user_profile_view, name='profile'),

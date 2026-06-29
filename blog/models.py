@@ -348,3 +348,26 @@ class PasswordResetAttempt(models.Model):
 
     def __str__(self):
         return f"{self.email} {self.ip} success={self.success}"
+
+
+class EmailVerification(models.Model):
+    """Код подтверждения email при регистрации."""
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="email_verification",
+    )
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Подтверждение email"
+        verbose_name_plural = "Подтверждения email"
+
+    def __str__(self):
+        return f"{self.user.username} (до {self.expires_at:%d.%m.%Y %H:%M})"
+
+    def is_expired(self):
+        return timezone.now() >= self.expires_at

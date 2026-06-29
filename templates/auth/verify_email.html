@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Подтверждение email — Чистый Мир{% endblock title %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-5 col-md-7">
+      <div class="card shadow-lg border-0 rounded-custom p-4 p-md-5">
+        <div class="text-center mb-4">
+          <i class="fas fa-envelope-open-text fa-3x text-primary mb-3"></i>
+          <h2 class="fw-bold">Подтвердите email</h2>
+          <p class="text-muted mb-0">
+            Мы отправили 6-значный код на<br>
+            <strong>{{ masked_email }}</strong>
+          </p>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} py-2 small">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" class="mb-3">
+          {% csrf_token %}
+          <label for="id_code" class="form-label fw-medium">Код из письма</label>
+          {{ form.code }}
+          {% if form.code.errors %}
+          <div class="text-danger small mt-2">{{ form.code.errors }}</div>
+          {% endif %}
+          <p class="form-text small text-muted mt-2">
+            Код действует {{ ttl_minutes }} минут. Проверьте папку «Спам», если письма нет.
+          </p>
+          <button type="submit" class="btn btn-primary w-100 py-3 mt-2">
+            <i class="fas fa-check me-2"></i>Подтвердить
+          </button>
+        </form>
+
+        <div class="text-center">
+          <a href="{% url 'resend_verification' %}" class="text-primary text-decoration-none small">
+            Отправить код повторно
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+  #id_code { letter-spacing: 0.35em; font-weight: 600; }
+</style>
+{% endblock content %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Повторная отправка кода{% endblock title %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-5 col-md-7">
+      <div class="card shadow border-0 rounded-custom p-4">
+        <h2 class="fw-bold h4 mb-3">Отправить код снова</h2>
+        <p class="text-muted small">Укажите email, который вы использовали при регистрации.</p>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} py-2 small">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          <label class="form-label" for="id_email">Email</label>
+          {{ form.email }}
+          {% if form.email.errors %}
+          <div class="text-danger small">{{ form.email.errors }}</div>
+          {% endif %}
+          <button type="submit" class="btn btn-primary w-100 mt-3">Отправить код</button>
+        </form>
+        <p class="text-center mt-3 mb-0 small">
+          <a href="{% url 'login' %}">Вернуться ко входу</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

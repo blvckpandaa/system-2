@@ -24,18 +24,26 @@ def _env_bool(name: str, default: bool) -> bool:
 
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "mail.windexs.ru")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "13091"))
+# На mail.windexs.ru обычно plain SMTP на 13090; 13091 у вас тоже без STARTTLS (см. EHLO).
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "13090"))
 # Порт 13091 у многих хостеров — STARTTLS (plain + starttls), не SMTPS как на 465.
 # Если не коннектится: в .env попробуйте EMAIL_USE_SSL=1 и EMAIL_USE_TLS=0 (implicit SSL).
 if _env_bool("EMAIL_USE_SSL", False):
     EMAIL_USE_SSL = True
     EMAIL_USE_TLS = False
 else:
-    EMAIL_USE_TLS = _env_bool("EMAIL_USE_TLS", True)
+    EMAIL_USE_TLS = _env_bool("EMAIL_USE_TLS", False)
     EMAIL_USE_SSL = False
 
-EMAIL_HOST_USER = "eccoprom@windexs.ru"
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+# Django вызывает SMTP AUTH только если заданы и логин, и пароль (см. smtp backend).
+# Если сервер не поддерживает AUTH — включите AUTH в mailer-server ИЛИ временно:
+#   EMAIL_SMTP_AUTH=0  (только если релей с IP приложения разрешён без логина).
+if _env_bool("EMAIL_SMTP_AUTH", True):
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "eccoprom@windexs.ru").strip() or None
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "").strip() or None
+else:
+    EMAIL_HOST_USER = None
+    EMAIL_HOST_PASSWORD = None
 
 DEFAULT_FROM_EMAIL = "Ecco Prom <eccoprom@windexs.ru>"
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
