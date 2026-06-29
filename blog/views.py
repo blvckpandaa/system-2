@@ -26,7 +26,7 @@ from .forms import (
     RegisterForm, LoginForm, AnnouncementForm, CommentForm
 )
 from .email_utils import issue_verification_code
-from .views_registration import SESSION_PENDING_USER_KEY
+from .views_registration import SESSION_PENDING_USER_KEY, start_email_verification_session
 from smtplib import SMTPAuthenticationError, SMTPException
 import json
 from django.http import JsonResponse
@@ -116,10 +116,27 @@ def register_view(request):
 
 def login_view(request):
     if request.method == 'POST':
+        username = (request.POST.get('username') or '').strip()
+        password = request.POST.get('password') or ''
+
+        if username and password:
+            inactive_user = User.objects.filter(
+                Q(username__iexact=username) | Q(email__iexact=username),
+                is_active=False,
+            ).first()
+            if inactive_user and inactive_user.check_password(password):
+                start_email_verification_session(
+                    request,
+                    inactive_user,
+                    "Аккаунт ещё не подтверждён. Введите 6-значный код из письма "
+                    "(или запросите новый на этой странице).",
+                )
+                return redirect('verify_email')
+
         form = LoginForm(request=request, data=request.POST)
         if form.is_valid():
-            user = form.get_user() 
-            login(request, user)    
+            user = form.get_user()
+            login(request, user)
             return redirect('index')
         else:
             return render(request, 'login.html', {'form': form})

@@ -19,6 +19,13 @@ RESEND_LIMIT = 3
 RESEND_WINDOW = 15 * 60
 
 
+def start_email_verification_session(request, user, message=None):
+    """Запоминает пользователя в сессии для экрана /verify-email/."""
+    request.session[SESSION_PENDING_USER_KEY] = user.pk
+    if message:
+        messages.info(request, message)
+
+
 def _get_pending_user(request):
     user_id = request.session.get(SESSION_PENDING_USER_KEY)
     if not user_id:
@@ -29,8 +36,11 @@ def _get_pending_user(request):
 def verify_email_view(request):
     user = _get_pending_user(request)
     if not user:
-        messages.warning(request, "Сначала зарегистрируйтесь или запросите код повторно.")
-        return redirect("register")
+        messages.warning(
+            request,
+            "Войдите с логином и паролем — откроется экран подтверждения email.",
+        )
+        return redirect("login")
 
     masked_email = user.email
     if "@" in masked_email:
