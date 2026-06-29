@@ -3,23 +3,11 @@
 {% load custom_filters %}
 {% block title %}Регистрация - Чистый Мир{% endblock title %}
 
-{% block extra_css %}
-<link href="{% static 'css/form-loading.css' %}" rel="stylesheet">
-{% endblock extra_css %}
-
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-lg-6 col-md-8">
-      <div class="card shadow-lg border-0 rounded-custom p-4 p-md-5 position-relative overflow-hidden" data-aos="fade-up" data-form-wrap>
-        <div class="form-loading-overlay d-none" aria-live="polite" aria-busy="false">
-          <div class="form-loading-panel">
-            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-              <span class="visually-hidden">Загрузка...</span>
-            </div>
-            <p class="form-loading-message">Регистрация...</p>
-          </div>
-        </div>
+      <div class="card shadow-lg border-0 rounded-custom p-4 p-md-5 position-relative overflow-hidden" data-aos="fade-up">
         <div class="position-absolute bg-primary opacity-10 rounded-circle" style="width: 300px; height: 300px; top: -120px; right: -120px;"></div>
         <div class="position-absolute bg-accent opacity-10 rounded-circle" style="width: 200px; height: 200px; bottom: -80px; left: -100px;"></div>
         
@@ -29,7 +17,7 @@
           <p class="text-muted">Создайте аккаунт и начните делать мир чище</p>
         </div>
         
-        <form method="POST" class="position-relative" data-loading-form data-loading-message="Регистрация...">
+        <form method="POST" class="position-relative" data-loading-form>
           {% csrf_token %}
           {% if next %}
           <input type="hidden" name="next" value="{{ next }}">

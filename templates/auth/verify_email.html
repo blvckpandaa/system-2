@@ -1,71 +1,61 @@
-{% extends "base.html" %}
-{% load static %}
-{% block title %}Подтверждение email — Чистый Мир{% endblock title %}
-
-{% block extra_css %}
-<link href="{% static 'css/form-loading.css' %}" rel="stylesheet">
-<style>
-  #id_code { letter-spacing: 0.35em; font-weight: 600; }
-</style>
-{% endblock extra_css %}
-
-{% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-5 col-md-7">
-      <div class="card shadow-lg border-0 rounded-custom p-4 p-md-5 position-relative overflow-hidden" data-form-wrap>
-        <div class="form-loading-overlay d-none" aria-live="polite" aria-busy="false">
-          <div class="form-loading-panel">
-            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-              <span class="visually-hidden">Загрузка...</span>
-            </div>
-            <p class="form-loading-message">Загрузка...</p>
-          </div>
-        </div>
-
-        <div class="text-center mb-4">
-          <i class="fas fa-envelope-open-text fa-3x text-primary mb-3"></i>
-          <h2 class="fw-bold">Подтвердите email</h2>
-          <p class="text-muted mb-0">
-            Мы отправили 6-значный код на<br>
-            <strong>{{ masked_email }}</strong>
-          </p>
-        </div>
-
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }} py-2 small">{{ message }}</div>
-        {% endfor %}
-        {% endif %}
-
-        <form method="post" class="mb-3" data-loading-form data-loading-message="Проверка кода...">
-          {% csrf_token %}
-          <label for="id_code" class="form-label fw-medium">Код из письма</label>
-          {{ form.code }}
-          {% if form.code.errors %}
-          <div class="text-danger small mt-2">{{ form.code.errors }}</div>
-          {% endif %}
-          <p class="form-text small text-muted mt-2">
-            Код действует {{ ttl_minutes }} минут. Проверьте папку «Спам», если письма нет.
-          </p>
-          <button type="submit" class="btn btn-primary w-100 py-3 mt-2">
-            <i class="fas fa-check me-2"></i>Подтвердить
-          </button>
-        </form>
-
-        <form method="post" class="text-center" data-loading-form data-loading-message="Отправка кода...">
-          {% csrf_token %}
-          <input type="hidden" name="action" value="resend">
-          <button type="submit" class="btn btn-link text-primary text-decoration-none small p-0">
-            <i class="fas fa-redo me-1"></i>Отправить код снова
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock content %}
-
-{% block extra_js %}
-<script src="{% static 'js/form-submit-loading.js' %}"></script>
-{% endblock extra_js %}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Подтверждение email — Чистый Мир{% endblock title %}
+
+{% block extra_css %}
+<style>
+  #id_code { letter-spacing: 0.35em; font-weight: 600; }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-5 col-md-7">
+      <div class="card shadow-lg border-0 rounded-custom p-4 p-md-5">
+        <div class="text-center mb-4">
+          <i class="fas fa-envelope-open-text fa-3x text-primary mb-3"></i>
+          <h2 class="fw-bold">Подтвердите email</h2>
+          <p class="text-muted mb-0">
+            Мы отправили 6-значный код на<br>
+            <strong>{{ masked_email }}</strong>
+          </p>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} py-2 small">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" class="mb-3" data-loading-form>
+          {% csrf_token %}
+          <label for="id_code" class="form-label fw-medium">Код из письма</label>
+          {{ form.code }}
+          {% if form.code.errors %}
+          <div class="text-danger small mt-2">{{ form.code.errors }}</div>
+          {% endif %}
+          <p class="form-text small text-muted mt-2">
+            Код действует {{ ttl_minutes }} минут. Проверьте папку «Спам», если письма нет.
+          </p>
+          <button type="submit" class="btn btn-primary w-100 py-3 mt-2">
+            <i class="fas fa-check me-2"></i>Подтвердить
+          </button>
+        </form>
+
+        <form method="post" class="text-center" data-loading-form>
+          {% csrf_token %}
+          <input type="hidden" name="action" value="resend">
+          <button type="submit" class="btn btn-link text-primary text-decoration-none small p-0">
+            <i class="fas fa-redo me-1"></i>Отправить код снова
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/form-submit-loading.js' %}"></script>
+{% endblock extra_js %}
