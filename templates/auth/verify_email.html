@@ -28,7 +28,7 @@
         {% endfor %}
         {% endif %}
 
-        <form method="post" class="mb-3">
+        <form method="post" class="mb-3" data-loading-form data-loading-message="Проверка кода...">
           {% csrf_token %}
           <label for="id_code" class="form-label fw-medium">Код из письма</label>
           {{ form.code }}
@@ -43,7 +43,7 @@
           </button>
         </form>
 
-        <form method="post" class="text-center">
+        <form method="post" class="text-center" data-loading-form data-loading-message="Отправка кода...">
           {% csrf_token %}
           <input type="hidden" name="action" value="resend">
           <button type="submit" class="btn btn-link text-primary text-decoration-none small p-0">
@@ -55,3 +55,7 @@
   </div>
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/form-submit-loading.js' %}"></script>
+{% endblock extra_js %}
