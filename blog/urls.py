@@ -2,6 +2,7 @@
 from django.urls import path
 from . import views
 from . import views_registration
+from . import views_ai_chat
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -56,6 +57,9 @@ urlpatterns = [
     path('chat/<int:chat_id>/', views.chat_detail_view, name='chat_detail'),
     path('chat/<int:chat_id>/message/', views.message_create_view, name='message_create'),
     path('chats/', views.user_chats_view, name='chat_list'),
+
+    # AI support chat (DeepSeek)
+    path('api/ai-chat/', views_ai_chat.ai_chat_view, name='ai_chat'),
 
     # OtherAnnouncement
     path('others/', views.other_announcement_list_create_view, name='other_announcement_list'),

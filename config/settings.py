@@ -189,6 +189,16 @@ RESET_LIMIT_PER_IP = 5          # 5 попыток
 RESET_LIMIT_PER_EMAIL = 3       # 3 попытки
 RESET_LIMIT_WINDOW = 15 * 60
 
+# DeepSeek AI chat (ключ в .env: DEEPSEEK_API_KEY=...)
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+DEEPSEEK_API_URL = os.environ.get(
+    "DEEPSEEK_API_URL",
+    "https://api.deepseek.com/chat/completions",
+).strip()
+DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat").strip()
+AI_CHAT_RATE_LIMIT = int(os.environ.get("AI_CHAT_RATE_LIMIT", "30"))
+AI_CHAT_RATE_WINDOW = int(os.environ.get("AI_CHAT_RATE_WINDOW", str(60 * 60)))
+
 try:
     from .settings_dev import *
 except ImportError:
