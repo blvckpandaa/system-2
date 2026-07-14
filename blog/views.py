@@ -48,8 +48,8 @@ try:
 except Exception:
     _SEMANTIC_OK = False
 
-Configuration.account_id = settings.YOOKASSA_SHOP_ID
-Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
+Configuration.account_id = settings.YOOKASSA_SHOP_ID or None
+Configuration.secret_key = settings.YOOKASSA_SECRET_KEY or None
 
 logger = logging.getLogger(__name__)
 
@@ -342,6 +342,14 @@ def announcement_create_view(request):
 
 def announcement_detail_view(request, pk):
     ann = get_object_or_404(Announcement, pk=pk)
+
+    # Неопубликованные объявления видят только владелец и staff
+    if ann.status != 'published':
+        is_owner = request.user.is_authenticated and ann.user_id == request.user.id
+        is_staff = request.user.is_authenticated and request.user.is_staff
+        if not (is_owner or is_staff):
+            raise PermissionDenied("Объявление недоступно.")
+
     ann.views_count += 1
     ann.save(update_fields=['views_count'])
     breadcrumb_list = []
@@ -389,10 +397,10 @@ def announcement_update_view(request, pk):
             updated = form.save(commit=False)
             if updated.plan:
                 updated.priority = updated.plan.priority
-            # If the announcement is in draft status, set it to pending when updated
-            if updated.status == 'draft':
-                updated.status = 'pending'
+            # После правок всегда повторная модерация — status из POST не принимается
+            updated.status = 'pending'
             updated.save()
+            messages.success(request, "Изменения сохранены. Объявление снова на модерации.")
             return redirect('announcement_detail', pk=pk)
         else:
             categories = Category.objects.all()
@@ -415,33 +423,42 @@ def announcement_update_view(request, pk):
 
 
 @login_required
+@require_POST
 def announcement_delete_view(request, pk):
     ann = get_object_or_404(Announcement, pk=pk)
     if ann.user != request.user:
         raise PermissionDenied("Faqat o'z e'loningizni o'chira olasiz.")
     ann.delete()
-    return redirect('announcement_list')
+    messages.success(request, "Объявление удалено.")
+    return redirect('announcement_user_list')
 
 
 @login_required
+@require_POST
 def announcement_activate_view(request, pk):
-    """Activate announcement (status=published)"""
+    """Отправить объявление на повторную модерацию (не публикует само)."""
     ann = get_object_or_404(Announcement, pk=pk)
     if ann.user != request.user:
         raise PermissionDenied("Вы можете активировать только свои объявления.")
-    ann.status = 'published'
+    if ann.status == 'published':
+        messages.info(request, "Объявление уже опубликовано.")
+        return redirect('announcement_detail', pk=pk)
+    ann.status = 'pending'
     ann.save(update_fields=['status'])
+    messages.success(request, "Объявление отправлено на модерацию.")
     return redirect('announcement_detail', pk=pk)
 
 
 @login_required
+@require_POST
 def announcement_deactivate_view(request, pk):
-    """Deactivate announcement (status=archived)"""
+    """Снять объявление с публикации (черновик)."""
     ann = get_object_or_404(Announcement, pk=pk)
     if ann.user != request.user:
         raise PermissionDenied("Вы можете деактивировать только свои объявления.")
     ann.status = 'draft'
     ann.save(update_fields=['status'])
+    messages.success(request, "Объявление снято с публикации.")
     return redirect('announcement_detail', pk=pk)
 
 
@@ -489,14 +506,23 @@ def create_payment_view(request, announcement_id, plan_id):
         messages.success(request, "План применен. Объявление ожидает проверки администратором.")
         return redirect('announcement_detail', pk=announcement.pk)
     try:
+        return_url = request.build_absolute_uri(
+            reverse("announcement_detail", kwargs={"pk": announcement.pk})
+        )
         yoo_payment = YooPayment.create({
             "amount": {"value": str(plan.amount), "currency": "RUB"},
             "confirmation": {
                 "type": "redirect",
-                "return_url": "https://example.com/payment/success/"
+                "return_url": return_url,
             },
             "capture": True,
             "description": f"Оплата '{announcement.title}' (Тариф: {plan.name})",
+            "metadata": {
+                "payment_type": "plan",
+                "announcement_id": str(announcement.id),
+                "plan_id": str(plan.id),
+                "user_id": str(request.user.id),
+            },
             "receipt": {
                 "customer": {
                     "email": request.user.email
@@ -518,7 +544,14 @@ def create_payment_view(request, announcement_id, plan_id):
         }, uuid.uuid4())
     except Exception as e:
         return HttpResponse(f"Ошибка YooKassa: {e}", status=500)
-    pay_obj = Payment.objects.create(user=request.user, announcement=announcement, plan=plan, amount=plan.amount, payment_id=yoo_payment.id, paid=False)
+    pay_obj = Payment.objects.create(
+        user=request.user,
+        announcement=announcement,
+        plan=plan,
+        amount=plan.amount,
+        payment_id=yoo_payment.id,
+        paid=False,
+    )
     confirmation_url = yoo_payment.confirmation.confirmation_url
     return render(request, 'payment_create.html', {"payment": pay_obj, "confirmation_url": confirmation_url})
 
@@ -837,29 +870,67 @@ def donation_list(request):
 
 # Webhook для получения уведомлений от ЮKassa
 @csrf_exempt
+@require_POST
 def yookassa_webhook(request):
-    if request.method == 'POST':
-        # Получаем данные от ЮKassa
-        event_json = json.loads(request.body)
-        payment_id = event_json['object']['id']
-        status = event_json['object']['status']
-        
-        # Проверяем статус платежа
-        if status == 'succeeded':
-            # Получаем ID пожертвования из метаданных
-            donation_id = event_json['object']['metadata'].get('donation_id')
-            if donation_id:
-                try:
-                    # Обновляем статус пожертвования
-                    donation = Donation.objects.get(id=donation_id)
-                    donation.paid = True
-                    donation.save()
-                except Donation.DoesNotExist:
-                    return JsonResponse({'status': 'error'}, status=404)
-        
-        return JsonResponse({'status': 'success'})
-    
-    return JsonResponse({'status': 'error'}, status=405)
+    """
+    Принимает уведомления ЮKassa, но подтверждает оплату только через
+    повторный запрос статуса платежа в API (не доверяет телу запроса).
+    """
+    if not settings.YOOKASSA_SHOP_ID or not settings.YOOKASSA_SECRET_KEY:
+        logger.error("YooKassa credentials are not configured")
+        return JsonResponse({"status": "error", "detail": "misconfigured"}, status=503)
+
+    try:
+        event_json = json.loads(request.body.decode("utf-8"))
+        payment_id = event_json["object"]["id"]
+    except (json.JSONDecodeError, UnicodeDecodeError, KeyError, TypeError) as exc:
+        logger.warning("Invalid YooKassa webhook payload: %s", exc)
+        return JsonResponse({"status": "error", "detail": "bad_payload"}, status=400)
+
+    try:
+        yoo_payment = YooPayment.find_one(payment_id)
+    except Exception as exc:
+        logger.exception("Failed to verify YooKassa payment %s: %s", payment_id, exc)
+        return JsonResponse({"status": "error", "detail": "verify_failed"}, status=502)
+
+    status = getattr(yoo_payment, "status", None)
+    if status != "succeeded":
+        return JsonResponse({"status": "ignored", "payment_status": status})
+
+    metadata = getattr(yoo_payment, "metadata", None) or {}
+    if not isinstance(metadata, dict):
+        try:
+            metadata = dict(metadata)
+        except (TypeError, ValueError):
+            metadata = {}
+
+    # Донаты
+    donation_id = metadata.get("donation_id")
+    if donation_id:
+        try:
+            donation = Donation.objects.get(id=donation_id)
+        except (Donation.DoesNotExist, ValueError, TypeError):
+            donation = Donation.objects.filter(payment_id=payment_id).first()
+        if donation and not donation.paid:
+            donation.paid = True
+            donation.payment_id = payment_id
+            donation.save(update_fields=["paid", "payment_id"])
+        return JsonResponse({"status": "success", "type": "donation"})
+
+    # Оплата тарифа объявления
+    pay = Payment.objects.filter(payment_id=payment_id).first()
+    if pay and not pay.paid:
+        pay.paid = True
+        pay.save(update_fields=["paid"])
+        ann = pay.announcement
+        if pay.plan:
+            ann.plan = pay.plan
+            ann.priority = pay.plan.priority
+            ann.save(update_fields=["plan", "priority"])
+        return JsonResponse({"status": "success", "type": "plan"})
+
+    logger.info("YooKassa payment %s succeeded but no local record matched", payment_id)
+    return JsonResponse({"status": "success", "type": "unmatched"})
 
 @login_required
 def admin_announcement_approval_view(request):

@@ -9,58 +9,25 @@ __pycache__/
 
 # django
 .env
+.env.*
+!.env.example
+.env.backup
 db.sqlite3
 media/
 staticfiles/
 
 # logs
 *.log
+gunicorn*.log
 
 # ide
 .idea/
-
-# local db & logs
-db.sqlite3
-*.log
-
-# Python
-venv/
-.env
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Logs
-*.log
-gunicorn*.log
-
-# Django
-db.sqlite3
-media/
-staticfiles/
+.vscode/
 
 # Node
 node_modules/
 dist/
 
-# Python
-venv/
-.env
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Logs
-*.log
-gunicorn*.log
-
-# Django
-db.sqlite3
-media/
-staticfiles/
-
-# Node
-node_modules/
-dist/
+# local C++ copies
+database.cpp
+mailer.cpp

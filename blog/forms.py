@@ -120,12 +120,7 @@ class AnnouncementForm(forms.ModelForm):
             'fkko_code',
             'price',
             'plan',
-            'status',
         ]
-        widgets = {
-            # При создании/редактировании всегда ставим статус pending
-            'status': forms.HiddenInput(attrs={'value': 'pending'}),
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -136,11 +131,10 @@ class AnnouncementForm(forms.ModelForm):
             url='fkko-autocomplete',
             attrs={
                 'data-placeholder': 'Начните вводить код ФККО…',
-                'class': 'form-select',  # можно поменять на form-control, если нужно
+                'class': 'form-select',
             }
         )
 
-        # Делаем остальные поля не обязательными, где нужно
         self.fields['city'].required = False
         self.fields['condition'].required = False
 

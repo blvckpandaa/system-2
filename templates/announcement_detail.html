@@ -511,14 +511,24 @@
     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
       <i class="fas fa-trash-alt me-2"></i>Удалить
     </button>
-    {% if announcement.is_active %}
-    <a href="{% url 'announcement_deactivate' announcement.id %}" class="btn btn-warning">
-      <i class="fas fa-eye-slash me-2"></i>Деактивировать
-    </a>
+    {% if announcement.status == 'published' %}
+    <form method="post" action="{% url 'announcement_deactivate' announcement.id %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-warning">
+        <i class="fas fa-eye-slash me-2"></i>Снять с публикации
+      </button>
+    </form>
+    {% elif announcement.status == 'draft' or announcement.status == 'archived' %}
+    <form method="post" action="{% url 'announcement_activate' announcement.id %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-paper-plane me-2"></i>На модерацию
+      </button>
+    </form>
     {% else %}
-    <a href="{% url 'announcement_activate' announcement.id %}" class="btn btn-success">
-      <i class="fas fa-eye me-2"></i>Активировать
-    </a>
+    <button type="button" class="btn btn-secondary" disabled>
+      <i class="fas fa-clock me-2"></i>На модерации
+    </button>
     {% endif %}
     {% if announcement.plan %}
     <a href="{% url 'upgrade_announcement' announcement.id %}" class="btn btn-info">
@@ -546,9 +556,12 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-        <a href="{% url 'announcement_delete' announcement.id %}" class="btn btn-danger">
-          <i class="fas fa-trash-alt me-2"></i>Удалить
-        </a>
+        <form method="post" action="{% url 'announcement_delete' announcement.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash-alt me-2"></i>Удалить
+          </button>
+        </form>
       </div>
     </div>
   </div>
