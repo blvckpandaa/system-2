@@ -2,92 +2,58 @@
 
 .ai-chat-fab {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
+  right: 20px;
+  bottom: 20px;
   z-index: 1080;
-  width: 78px;
-  height: 78px;
-  padding: 0;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: #fff;
-  box-shadow: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 8px 18px 8px 8px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  background: var(--primary-gradient, linear-gradient(135deg, #2E8B57 0%, #3CB371 100%));
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(46, 139, 87, 0.4);
   cursor: pointer;
-  transition: transform 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
 .ai-chat-fab:hover {
-  transform: translateY(-3px) scale(1.04);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(46, 139, 87, 0.5);
   color: #fff;
 }
 
-.ai-chat-fab-core {
-  position: relative;
-  z-index: 2;
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  background: var(--primary-gradient, linear-gradient(135deg, #2E8B57 0%, #3CB371 100%));
-  box-shadow: 0 8px 24px rgba(46, 139, 87, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  transition: background 0.25s ease, box-shadow 0.25s ease;
-}
-
-.ai-chat-fab:hover .ai-chat-fab-core {
-  box-shadow: 0 12px 28px rgba(46, 139, 87, 0.5);
-}
-
-.ai-chat-fab.is-open .ai-chat-fab-core {
+.ai-chat-fab.is-open {
   background: var(--primary-dark, #1a5e3a);
 }
 
-.ai-chat-fab-ring {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
+.ai-chat-fab-icon {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-  animation: aiChatFabSpin 18s linear infinite;
+  background: rgba(255, 255, 255, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
 }
 
-.ai-chat-fab:hover .ai-chat-fab-ring,
-.ai-chat-fab.is-open .ai-chat-fab-ring {
-  animation-play-state: paused;
-}
-
-.ai-chat-fab-ring-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.ai-chat-fab-ring-text {
-  fill: var(--primary-dark, #1a5e3a);
+.ai-chat-fab-label {
   font-family: 'Poppins', system-ui, sans-serif;
-  font-size: 9.2px;
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-}
-
-@keyframes aiChatFabSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .ai-chat-panel {
   position: fixed;
-  right: 24px;
-  bottom: 112px;
+  right: 20px;
+  bottom: 88px;
   z-index: 1080;
   width: min(380px, calc(100vw - 32px));
   height: min(520px, calc(100vh - 140px));
@@ -290,28 +256,28 @@
 
 @media (max-width: 575.98px) {
   .ai-chat-fab {
-    right: 14px;
-    bottom: 14px;
-    width: 72px;
-    height: 72px;
+    right: 12px;
+    bottom: 12px;
+    padding: 7px 14px 7px 7px;
+    gap: 8px;
+    min-height: 48px;
   }
 
-  .ai-chat-fab-core {
-    width: 50px;
-    height: 50px;
-    font-size: 1.15rem;
+  .ai-chat-fab-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
   }
 
-  .ai-chat-fab-ring-text {
-    font-size: 8.6px;
-    letter-spacing: 1.2px;
+  .ai-chat-fab-label {
+    font-size: 0.88rem;
   }
 
   .ai-chat-panel {
     right: 8px;
     left: 8px;
     width: auto;
-    bottom: 96px;
+    bottom: 76px;
     height: min(70vh, 560px);
   }
 }
