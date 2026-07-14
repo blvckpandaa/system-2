@@ -106,25 +106,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# SQLite: USE_SQLITE=1 (как раньше через settings_dev). Иначе PostgreSQL + psycopg2.
-if _env_bool("USE_SQLITE", False):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB', 'postgres'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+        'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("POSTGRES_DB", "postgres"),
-            "USER": os.environ.get("POSTGRES_USER", "postgres"),
-            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", ""),
-            "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
-            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
-        }
-    }
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -204,9 +195,8 @@ DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat").strip()
 AI_CHAT_RATE_LIMIT = int(os.environ.get("AI_CHAT_RATE_LIMIT", "30"))
 AI_CHAT_RATE_WINDOW = int(os.environ.get("AI_CHAT_RATE_WINDOW", str(60 * 60)))
 
-# Local overrides only when DJANGO_DEV=1 (SQLite, DEBUG=True, etc.)
-if _env_bool("DJANGO_DEV", False):
-    try:
-        from .settings_dev import *  # noqa: F401,F403
-    except ImportError:
-        pass
+# Как раньше: settings_dev перекрывает DEBUG и БД (SQLite)
+try:
+    from .settings_dev import *  # noqa: F401,F403
+except ImportError:
+    pass
