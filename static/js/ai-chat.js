@@ -40,6 +40,14 @@
     return div.innerHTML;
   }
 
+  function formatMessage(text) {
+    var escaped = escapeHtml(text);
+    return escaped.replace(
+      /(https?:\/\/[^\s<]+)/g,
+      '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     var fab = document.getElementById('aiChatFab');
     var panel = document.getElementById('aiChatPanel');
@@ -64,7 +72,7 @@
     function appendBubble(role, text, isError) {
       var bubble = document.createElement('div');
       bubble.className = 'ai-chat-bubble ' + (isError ? 'error' : role === 'user' ? 'user' : 'bot');
-      bubble.innerHTML = escapeHtml(text);
+      bubble.innerHTML = formatMessage(text);
       messagesEl.appendChild(bubble);
       scrollBottom();
     }
@@ -75,7 +83,7 @@
       }
       appendBubble(
         'assistant',
-        'Здравствуйте! Я AI-помощник «Чистый Мир». Спросите про переработку, утилизацию, раздельный сбор или вторичное сырье.'
+        'Здравствуйте! Я AI-помощник «Чистый Мир». Спросите про сайт, объявления, переработку или утилизацию. По юридическим вопросам подскажу, куда обратиться.'
       );
     }
 
