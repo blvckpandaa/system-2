@@ -7,14 +7,22 @@
   z-index: 1080;
   display: inline-flex;
   align-items: center;
+  justify-content: flex-start;
+  flex-direction: row;
   gap: 10px;
+  width: auto;
+  max-width: none;
+  height: auto;
   min-height: 52px;
   padding: 8px 18px 8px 8px;
+  margin: 0;
   border: 2px solid rgba(255, 255, 255, 0.85);
   border-radius: 999px;
   background: var(--primary-gradient, linear-gradient(135deg, #2E8B57 0%, #3CB371 100%));
   color: #fff;
   box-shadow: 0 8px 24px rgba(46, 139, 87, 0.4);
+  overflow: visible;
+  white-space: nowrap;
   cursor: pointer;
   transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }

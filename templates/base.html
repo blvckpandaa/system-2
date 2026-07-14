@@ -35,7 +35,76 @@
   <!-- Custom CSS -->
   <link href="{% static 'style.css' %}" rel="stylesheet">
 <link href="{% static 'fkko.css' %}" rel="stylesheet">
-<link href="{% static 'css/ai-chat.css' %}" rel="stylesheet">
+<link href="{% static 'css/ai-chat.css' %}?v=2" rel="stylesheet">
+<style>
+  /* FAB always visible — не зависит от collectstatic */
+  #aiChatFab.ai-chat-fab {
+    position: fixed !important;
+    right: 20px !important;
+    bottom: 20px !important;
+    z-index: 1080 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-direction: row !important;
+    gap: 10px !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 52px !important;
+    padding: 8px 18px 8px 8px !important;
+    margin: 0 !important;
+    border: 2px solid #fff !important;
+    border-radius: 999px !important;
+    background: linear-gradient(135deg, #2E8B57 0%, #3CB371 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 24px rgba(46, 139, 87, 0.4) !important;
+    overflow: visible !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer !important;
+  }
+  #aiChatFab .ai-chat-fab-icon {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    color: #fff !important;
+    font-size: 1.05rem !important;
+  }
+  #aiChatFab .ai-chat-fab-label {
+    display: inline-block !important;
+    color: #fff !important;
+    font-family: 'Poppins', system-ui, sans-serif !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+  #aiChatFab.ai-chat-fab.is-open {
+    background: #1a5e3a !important;
+  }
+  @media (max-width: 575.98px) {
+    #aiChatFab.ai-chat-fab {
+      right: 12px !important;
+      bottom: 12px !important;
+      padding: 7px 14px 7px 7px !important;
+      min-height: 48px !important;
+    }
+    #aiChatFab .ai-chat-fab-label {
+      font-size: 0.88rem !important;
+    }
+  }
+</style>
 
   
   <style>
