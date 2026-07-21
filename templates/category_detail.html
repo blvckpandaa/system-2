@@ -7,7 +7,7 @@
 {% block content %}
 <div class="container py-4">
   <!-- Хлебные крошки -->
-  <nav aria-label="breadcrumb" class="mb-4">
+  <nav aria-label="breadcrumb" class="mb-4 category-page-nav">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
       <li class="breadcrumb-item"><a href="{% url 'category_list' %}">Категории</a></li>
@@ -20,13 +20,13 @@
     <div class="row align-items-center">
       <div class="col-md-8">
         <h1 class="category-title mb-2">{{ category.name }}</h1>
-        <p class="text-muted mb-0">Найдено объявлений: <span class="badge bg-primary">{{ ann_list|length }}</span></p>
+        <p class="text-muted mb-0">Найдено объявлений: <span class="badge category-count-badge">{{ ann_list|length }}</span></p>
       </div>
-      <div class="col-md-4 mt-3 mt-md-0 text-md-end">
-        <a href="{% url 'category_list' %}" class="btn btn-outline-primary btn-sm">
+      <div class="col-md-4 mt-3 mt-md-0 text-md-end category-header-actions">
+        <a href="{% url 'category_list' %}" class="btn btn-outline-primary btn-sm category-action-btn">
           <i class="fas fa-th-list me-2"></i>Все категории
         </a>
-        <a href="{% url 'category_tree' %}" class="btn btn-outline-secondary btn-sm ms-2">
+        <a href="{% url 'category_tree' %}" class="btn btn-outline-secondary btn-sm category-action-btn">
           <i class="fas fa-sitemap me-2"></i>Дерево категорий
         </a>
       </div>
@@ -110,7 +110,36 @@
 <style>
   /* Заголовок категории */
   .category-header {
-    border-left: 5px solid var(--bs-primary);
+    border-left: 5px solid #1e983a;
+  }
+
+  .category-count-badge {
+    background-color: #1e983a !important;
+    color: #fff !important;
+  }
+
+  .category-page-nav .breadcrumb-item a {
+    color: #1e983a !important;
+    text-decoration: none;
+  }
+
+  .category-page-nav .breadcrumb-item a:hover {
+    color: #167a2e !important;
+    text-decoration: underline;
+  }
+
+  .category-header-actions .category-action-btn {
+    margin-bottom: 0.5rem;
+  }
+
+  .category-header-actions .btn-outline-primary {
+    color: #1e983a !important;
+    border-color: #1e983a !important;
+  }
+
+  .category-header-actions .btn-outline-primary:hover {
+    background-color: #1e983a !important;
+    color: #fff !important;
   }
   
   .category-title {
@@ -153,6 +182,11 @@
     
     .category-header {
       padding: 1rem !important;
+    }
+
+    .category-header-actions .category-action-btn {
+      display: inline-block;
+      margin-bottom: 0.5rem;
     }
   }
   
